@@ -99,7 +99,7 @@ export class AppComponent {
     // corners.convertTo(corners, cv.CV_8U, 255);
     // cv.cvtColor(corners,  cv.COLOR_RGBA2GRAY);
     // cv.goodFeaturesToTrack(src, corners, 4, 0.5, 50);
-    let M = cv.Mat.ones(5, 5, cv.CV_8U);
+    let M = cv.Mat.ones(4, 4, cv.CV_8U);
     let anchor = new cv.Point(-1, -1);
     // You can try more different parameters
     
@@ -130,7 +130,7 @@ export class AppComponent {
 
     let ksize = new cv.Size(5, 5);
     let anchor = new cv.Point(-1, -1);
-    let M = cv.Mat.ones(2, 2, cv.CV_8U);
+    let M = cv.Mat.ones(4, 4, cv.CV_8U);
     cv.Canny(src, src, 50, 100, 3, true);
     // cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2, 0, 0);
     // cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2, 1, 2);
@@ -138,7 +138,7 @@ export class AppComponent {
 
     cv.dilate(src, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
 
-  this.detectCorners(dst, dst1,12,1,0.9);
+  this.detectCorners(dst, dst1,12,3,0.9);
     cv.imshow(this.canvasOutput.nativeElement.id, dst1);
  
     src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
@@ -159,14 +159,17 @@ export class AppComponent {
   detectCorners(srcData: any, outData: any,  length: number, width: number, sensitivity: number) {
     if (width % 2 == 0){width++}
     const offset = Math.floor( width / 2);
+    let data: boolean[][] = [];
     let horizLines: number[][] = [];
     let vertLines: number[][] = [];
     for (let i = 0; i < srcData.rows; i++){
       horizLines[i] = [];
       vertLines[i] = [];
+      data[i] = [];
       for (let j = 0; j < srcData.cols; j++){
-        horizLines[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0)? 1 : 0;
-        vertLines[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0)? 1 : 0;
+        // horizLines[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0)? 1 : 0;
+        // vertLines[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0)? 1 : 0;
+        data[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0)? true : false;
       }
     }
     for (let i = 0; i < srcData.rows; i++){
@@ -179,7 +182,8 @@ export class AppComponent {
         let colEnd = (j + length  > srcData.cols)? srcData.cols : j + length ;
         for (let m = rowStart; m < rowEnd; m++) {
           for (let n = colStart; n < colEnd; n++)
-          count = count + horizLines[m][n];
+          // count = count + horizLines[m][n];
+          if(data[m][n]){count++};
          
         }
         horizLines[i][j] = count;
@@ -195,8 +199,8 @@ export class AppComponent {
         let colEnd = (j + offset + 1 > srcData.cols) ? srcData.cols : j + offset + 1;
         for (let m = rowStart; m < rowEnd; m++) {
           for (let n = colStart; n < colEnd; n++)
-          count = count + vertLines[m][n];
-          
+          // count = count + vertLines[m][n];
+          if(data[m][n]){count++};
         }
         vertLines[i][j] = count;
       }
@@ -216,9 +220,11 @@ export class AppComponent {
       }
     }
     
-    for (let i = length; i < srcData.rows - length; i++){
-      for (let j = length; j < srcData.cols - length; j++) {
-        if ((horizLines[i][j] - horizLines[i][j - length] + vertLines[i][j] - vertLines[i - length][j]) > 2 * width * length * sensitivity){
+    for (let i = 0; i < srcData.rows ; i++){
+      for (let j = 0; j < srcData.cols; j++) {
+        let ii = (i - length < 0) ? 0 : i - length;
+        let jj = (j - length < 0) ? 0 : j - length;
+        if ((horizLines[i][j] - horizLines[i][jj] + vertLines[i][j] - vertLines[ii][j]) > 2 * width * length * sensitivity){
           this.drawLine(j, i, length, outData, 'topLeft')
         }
       }
