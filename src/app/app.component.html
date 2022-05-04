@@ -31,6 +31,16 @@
   <!-- <div class="control"><button id="tryIt" (click)="detectFace()" [disabled]="!classifiersLoaded$ | async">Detect Face</button></div> -->
   <div class="control"><button id="tryIt" (click)="findContours()" >Detect Contours</button></div>
 </div>
+Row
+<input  [(ngModel)]  = "selRow">
+Col
+<input  [(ngModel)]  = "selCol">
+{{selCol}}
+<button (click)="showEl()">xxxx</button>
+<div>
+  <canvas #elOutput id="elOutput"></canvas>
+</div>
+{{ocrOutput}}
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->

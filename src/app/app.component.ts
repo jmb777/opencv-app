@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, Input } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { tap, switchMap, filter } from 'rxjs/operators';
 import { forkJoin, Observable, empty, fromEvent, BehaviorSubject } from 'rxjs';
@@ -8,6 +8,8 @@ import { Coord } from './coord.class';
 import { createWorker } from 'tesseract.js';
 import { Rectangle } from './rectangle';
 import * as Tesseract from 'tesseract.js';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -27,8 +29,13 @@ export class AppComponent {
   canvasInput: ElementRef;
   @ViewChild('canvasOutput')
   canvasOutput: ElementRef;
-  ocrResult:any;
-
+  ocrResult: any;
+  data: boolean[][] = [];
+  @Input() selRow = 0;
+  @Input() selCol = 0;
+  grid: Coord[][] = [];
+  @ViewChild('elOutput') elOutput: ElementRef;
+  ocrOutput: string;
 
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
@@ -121,13 +128,13 @@ export class AppComponent {
 
 
     cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-    let grid = this.detectCorners(dst, src, 75, 5, 5);
+    this.grid = this.detectCorners(dst, src, 75, 5, 5);
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     // let img = 
-    
+
     cv.imshow(this.canvasOutput.nativeElement.id, src);
     try {
-      this.doOCR(grid);
+      // this.doOCR(this.grid);
     } catch (error) {
       console.log(error);
     }
@@ -144,40 +151,40 @@ export class AppComponent {
     let bottomRightCoords: Coord[] = [];
     if (width % 2 == 0) { width++ }
     const offset = Math.floor(width / 2);
-    let data: boolean[][] = [];
+
 
 
     for (let i = 0; i < srcData.rows; i++) {
 
-      data[i] = [];
- 
+      this.data[i] = [];
+
       for (let j = 0; j < srcData.cols; j++) {
 
-        data[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0) ? true : false;
+        this.data[i][j] = (srcData.ucharAt(i, j * srcData.channels() + 1) > 0) ? true : false;
 
       }
     }
- 
+
 
 
     for (let i = 10; i < srcData.rows - 10; i++) {
       for (let j = 10; j < srcData.cols - 10; j++) {
 
-        let longRight = this.linePresent(data, i, j, length, sensitivity, 'right');
-        let longLeft = this.linePresent(data, i, j, length, sensitivity, 'left');
-        let longUp = this.linePresent(data, i, j, length, sensitivity, 'up');
-        let longDown = this.linePresent(data, i, j, length, sensitivity, 'down');
-        let shortLeft = (longLeft) ? longLeft : this.linePresent(data, i, j, sensitivity, sensitivity, 'left');
-        let shortRight = (longRight) ? longRight : this.linePresent(data, i, j, sensitivity, sensitivity, 'right');
-        let shortUp = (longUp) ? longUp : this.linePresent(data, i, j, sensitivity, sensitivity, 'up');
-        let shortDown = (longDown) ? longDown : this.linePresent(data, i, j, sensitivity, sensitivity, 'down');
+        let longRight = this.linePresent(this.data, i, j, length, sensitivity, 'right');
+        let longLeft = this.linePresent(this.data, i, j, length, sensitivity, 'left');
+        let longUp = this.linePresent(this.data, i, j, length, sensitivity, 'up');
+        let longDown = this.linePresent(this.data, i, j, length, sensitivity, 'down');
+        let shortLeft = (longLeft) ? longLeft : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'left');
+        let shortRight = (longRight) ? longRight : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'right');
+        let shortUp = (longUp) ? longUp : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'up');
+        let shortDown = (longDown) ? longDown : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'down');
 
 
         if (longRight && longDown && !shortLeft && !shortUp) {
 
           topLeftCoords.push(new Coord(i, j));
           console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
-          console.log('long left ' + this.linePresent(data, i, j, length, sensitivity, 'left'));
+          console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
         }
         if (longLeft && longDown && !shortRight && !shortUp) {
 
@@ -198,7 +205,7 @@ export class AppComponent {
 
     let points: Coord[] = this.findSquare(topLeftCoords, topRightCoords, bottomLeftCoords, bottomRightCoords, 10);
     if (points.length == 4) {
-      
+
       for (let i = 0; i < 10; i++) {
         coords[i] = [];
         for (let j = 0; j < 10; j++) {
@@ -219,9 +226,9 @@ export class AppComponent {
       let color1 = new cv.Scalar(255, 0, 0);
       for (let row = 0; row < coords.length - 1; row++) {
         for (let col = 0; col < coords.length - 1; col++) {
-          let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row ));
-          let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col ), Math.floor(coords[row + 1][col + 1].row ));
-          // cv.rectangle(outData, pt, pb, color1);
+          let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row));
+          let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col), Math.floor(coords[row + 1][col + 1].row));
+          cv.rectangle(outData, pt, pb, color1);
         }
       }
 
@@ -413,19 +420,13 @@ export class AppComponent {
   }
 
 
-  
-  async doOCR(grid) {
-    let canvas =<HTMLCanvasElement>document.getElementById('canvasOutput');
-let ctx = canvas.getContext('2d');
-let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-// for (let row = 0; row < 9; row++) {
-//   for (let col = 0; col < 9; col++) {
-//     let r = new Rectangle(grid[row][col], grid[row + 1][col + 1]);
-//     console.log(r.top + ' ' + r.left);
 
-//   }
-// }  
-this.ocrResult = "Recognising...";
+  async doOCR() {
+    let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+    let ctx = canvas.getContext('2d');
+    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    this.ocrResult = "Recognising...";
     const worker = createWorker({
       // logger: m => console.log(m),
     });
@@ -435,24 +436,45 @@ this.ocrResult = "Recognising...";
 
     await worker.initialize('eng');
     await worker.setParameters({
-    tessedit_char_whitelist: '123456789'
+      tessedit_char_whitelist: '123456789'
     });
     await worker.setParameters({
       tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
-      });
-    
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        let r = new Rectangle(grid[row][col], grid[row + 1][col + 1]);
-        const { data: { text } } = await worker.recognize(this.imageUrl, {rectangle: r });
-        console.log(r.top + ' ' + r.left + '    ' + text);
-    
-      }
-    }  
-    
+    });
+    // await worker.recognize(this.elOutput.nativeElement.id);
+    // for (let row = 0; row < 9; row++) {
+    //   for (let col = 0; col < 9; col++) {
+    //     let r = new Rectangle(grid[row][col], grid[row + 1][col + 1]);
+    const img = canvas.toDataURL('image/png');
+    const { data: { text } } = await worker.recognize(img);
+    console.log(text);
+    this.ocrOutput = text;
+    await worker.terminate();
+    //   }
+    // }  
+
     // this.ocrResult = words;
     // console.log(words);
 
+  }
+  showEl() {
+    let src = cv.imread('canvasOutput');
+    let dst = new cv.Mat();
+    // You can try more different parameters
+    let r = new Rectangle(this.grid[this.selRow][this.selCol], this.grid[Number(this.selRow) + 1][Number(this.selCol) + 1]);
+    let rect = new cv.Rect(r.left + 2, r.top + 2, r.width - 4, r.height - 4);
+
+
+    dst = src.roi(rect);
+    cv.imshow(this.elOutput.nativeElement.id, dst);
+    try {
+      this.doOCR();
+    } catch (error) {
+      console.log(error);
+    }
+
+    src.delete();
+    dst.delete();
   }
 }
 
