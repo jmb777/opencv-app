@@ -1,0 +1,66 @@
+.topBorder{
+    border-top: black;
+    border-top-width: thick !important; 
+    border-top-style: solid !important;
+}
+.bottomBorder{
+    border-bottom: black;
+    border-bottom-width: thick !important; 
+    border-bottom-style: solid !important;
+}
+.leftBorder{
+    border-left: black;
+    border-left-width: thick !important; 
+    border-left-style: solid !important;
+}
+.rightBorder{
+    border-right: black;
+    border-right-width: thick !important; 
+    border-right-style: solid !important;
+}
+.gridBorder{
+    border-color: black;
+    border-width: thin; 
+    border-style: dotted;
+    padding: 1px; 
+   
+}
+.cellContent{
+    border-color: black;
+    border-width: thin; 
+    border-style: dotted;
+}
+.inputBox{
+    width: 50px;
+    background-color: aqua;
+    font-size: x-large;
+    text-align: center;
+}
+.cell{
+    width: 75px;
+    height: 75px;
+}
+.isSelected{
+    background-color: turquoise;
+
+}
+.killerBorderRight{
+    border-right-color: black;
+    border-right-width: medium; 
+    border-right-style: dotted;
+}
+.killerBorderLeft{
+    border-left-color: black;
+    border-left-width: medium; 
+    border-left-style: dotted;
+}
+.killerBorderTop{
+    border-top-color: black;
+    border-top-width: medium; 
+    border-top-style: dotted;
+}
+.killerBorderBottom{
+    border-bottom-color: black;
+    border-bottom-width: medium; 
+    border-bottom-style: dotted;
+}

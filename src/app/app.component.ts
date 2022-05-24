@@ -9,7 +9,8 @@ import { createWorker } from 'tesseract.js';
 import { Rectangle } from './rectangle';
 import * as Tesseract from 'tesseract.js';
 import { FormsModule } from '@angular/forms';
-
+import { CellComponent } from './cell/cell.component';
+import { CellOption } from './classes/cellOption';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -36,7 +37,12 @@ export class AppComponent {
   grid: Coord[][] = [];
   @ViewChild('elOutput') elOutput: ElementRef;
   ocrOutput: string;
-
+  gridContents: CellOption[] = [];
+  rows = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  killerPuzzle: CellOption[][] = [];
+  isKillerInput = false;
+  killerCells: CellOption[] = [];
+  colourIndex = 0;
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
@@ -130,6 +136,7 @@ export class AppComponent {
     cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     this.grid = this.detectCorners(dst, src, 75, 5, 5);
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+    // cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
     // let img = 
 
     cv.imshow(this.canvasOutput.nativeElement.id, src);
@@ -228,7 +235,7 @@ export class AppComponent {
         for (let col = 0; col < coords.length - 1; col++) {
           let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row));
           let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col), Math.floor(coords[row + 1][col + 1].row));
-          cv.rectangle(outData, pt, pb, color1);
+          // cv.rectangle(outData, pt, pb, color1);
         }
       }
 
@@ -419,7 +426,65 @@ export class AppComponent {
     console.log('clicked');
   }
 
+  async readGrid() {
+    let src = cv.imread('canvasOutput');
+    cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+    let dst = new cv.Mat();
+    let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+    let ctx = canvas.getContext('2d');
+    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
+    this.ocrResult = "Recognising...";
+    const worker = createWorker({
+      // logger: m => console.log(m),
+    });
+
+    await worker.load();
+    await worker.loadLanguage('eng');
+
+    await worker.initialize('eng');
+    await worker.setParameters({
+      tessedit_char_whitelist: '123456789'
+    });
+    await worker.setParameters({
+      tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
+    });
+    // await worker.recognize(this.elOutput.nativeElement.id);
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        let r = new Rectangle(this.grid[row][col], this.grid[row + 1][col + 1]);
+        let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
+        dst = src.roi(rect);
+        let count = 0;
+        for (let i = 0; i < dst.rows; i++) {
+          for (let j = 0; j < dst.cols; j++) {
+            if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
+          }
+        }
+        // console.log('count = ' + count + '  Diff pixels ' + ((dst.rows * dst.cols - count) < 10));
+        if(!((dst.rows * dst.cols - count) < 10)) {
+          cv.imshow(this.elOutput.nativeElement.id, dst);
+
+          const img = canvas.toDataURL('image/png');
+          const { data: { text } } = await worker.recognize(img);
+          console.log('Row ' + row + '   Col ' + col + '  Character ' + text);
+        } else {
+          console.log('Row ' + row + '   Col ' + col + '  Character ' );
+        }
+        
+      }
+    }
+    // const img = canvas.toDataURL('image/png');
+    // const { data: { text } } = await worker.recognize(img);
+    // console.log(text);
+    // this.ocrOutput = text;
+    await worker.terminate();
+    //   }
+    // }  
+
+    // this.ocrResult = words;
+    // console.log(words);
+  }
 
   async doOCR() {
     let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
@@ -457,15 +522,32 @@ export class AppComponent {
     // console.log(words);
 
   }
+  showGrid() {
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        this.selRow = i;
+        this.selCol = j;
+        this.showEl();
+      }
+    }
+  }
   showEl() {
     let src = cv.imread('canvasOutput');
+    cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
     let dst = new cv.Mat();
     // You can try more different parameters
     let r = new Rectangle(this.grid[this.selRow][this.selCol], this.grid[Number(this.selRow) + 1][Number(this.selCol) + 1]);
-    let rect = new cv.Rect(r.left + 2, r.top + 2, r.width - 4, r.height - 4);
+    let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
 
 
     dst = src.roi(rect);
+    let count = 0;
+    for (let i = 0; i < dst.rows; i++) {
+      for (let j = 0; j < dst.cols; j++) {
+        if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
+      }
+    }
+    console.log('count = ' + count);
     cv.imshow(this.elOutput.nativeElement.id, dst);
     try {
       this.doOCR();
@@ -476,7 +558,108 @@ export class AppComponent {
     src.delete();
     dst.delete();
   }
-}
+  cellSelected(cell: CellOption) {
+    if (this.isKillerInput) {
+      let alreadySelected = false;
+      this.killerPuzzle.forEach(group => {
+        if (group.includes(cell)) { alreadySelected = true; }
+      });
+      if (alreadySelected) { return; }
+      if (cell.isSelected) {
+        cell.killerBorderBottom = false;
+        cell.killerBorderLeft = false;
+        cell.killerBorderRight = false;
+        cell.killerBorderTop = false;
+        this.killerCells.splice(this.killerCells.indexOf(cell), 1);
+      } else {
+        this.killerCells.push(cell);
+      }
+
+      if (this.areContiguousCells(this.killerCells)) {
+        cell.isSelected = (cell.isSelected) ? false : true;
+
+      } else {
+        if (cell.isSelected) {
+          this.killerCells.push(cell);
+        } else {
+
+          this.killerCells.splice(this.killerCells.indexOf(cell), 1);
+        }
+      }
+
+      this.setKillerBorders();
+
+    }
+
+}areContiguousCells(cells: CellOption[]): boolean {
+    if (cells.length === 1) {
+      return true;
+    }
+
+    for (const c of cells) {
+      let result = false;
+      const row = Math.floor(c.cellNumber / 9);
+      const col = c.cellNumber % 9;
+      cells.forEach(p => {
+
+        const row1 = Math.floor(p.cellNumber / 9);
+        const col1 = p.cellNumber % 9;
+        if (row === row1 && Math.abs(col - col1) === 1) {
+          result = true;
+        }
+        if (col === col1 && Math.abs(row - row1) === 1) {
+          result = true;
+        }
+
+      });
+
+      if (!result) { return false; }
+    }
+    return true;
+    
+  }
+
+  setKillerBorders() {
+    this.killerCells.forEach(c => {
+      c.killerBorderBottom = false;
+      c.killerBorderLeft = false;
+      c.killerBorderRight = false;
+      c.killerBorderTop = false;
+      // c.killerBackground = this.colours[this.colourIndex];
+    });
+    this.colourIndex++;
+    this.colourIndex = this.colourIndex % 14;
+    this.killerCells.sort((a, b) => a.cellNumber > b.cellNumber ? 1 : -1);
+    for (const c of this.killerCells) {
+      const _row = Math.floor(c.cellNumber / 9);
+      const _col = c.cellNumber % 9;
+      let _top = true;
+      let _bottom = true;
+      let _right = true;
+      let _left = true;
+
+      this.killerCells.forEach(cell => {
+        if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 + 1 === _col) { _left = false; }
+        if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 - 1 === _col) { _right = false; }
+        if (Math.floor(cell.cellNumber / 9) + 1 === _row && cell.cellNumber % 9 === _col) { _top = false; }
+        if (Math.floor(cell.cellNumber / 9) - 1 === _row && cell.cellNumber % 9 === _col) { _bottom = false; }
+      });
+
+      c.killerBorderTop = _top;
+      c.killerBorderBottom = _bottom;
+      c.killerBorderLeft = _left;
+      c.killerBorderRight = _right;
+    }
+
+
+  }
+  setNewValue(e) {
+
+    // console.log(e);
+    this.gridContents[e.key].values = e.value; 
+    const next = e.key + 1;
+    // setTimeout(() => {this.viewChildren.toArray()[next].inputElement.nativeElement.focus();},0);
+  }
 
   // findCorners() {
   //   let src = cv.imread(this.canvasInput.nativeElement.id);
@@ -669,3 +852,4 @@ export class AppComponent {
 
 
   // }
+}

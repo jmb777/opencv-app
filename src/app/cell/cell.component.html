@@ -1,0 +1,12 @@
+<div [style.background-color]="cellOption.killerBackground" class="cell"  [ngClass]="borderClasses">
+  <div class="cellContent" [ngClass] = "setKillerBorders()" (click) = "selectCell()">
+    <div  >
+      &nbsp;{{cellOption.killerNumber}}
+    </div>
+    <input class="inputBox" [value] = "cellOption.uniqueValue" [disabled] = "killerInput" #box (blur)="setValue(box.value)">
+
+    <div >
+      {{showOptionValues()}}
+    </div>
+  </div>
+</div>

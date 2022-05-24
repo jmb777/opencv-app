@@ -1,10 +1,4 @@
 
-<button (click) = "test()">xxx</button>
-<h2>Face Detection Example</h2>
-<p>
-  &lt;canvas&gt; elements named <b>canvasInput</b> and <b>canvasOutput</b> have been prepared.<br>
-  Click <b>Detect Face</b> button to see the result. You can choose another image.<br>
-</p>
 
 <div>
   <table cellpadding="0" cellspacing="0" width="0" border="0">
@@ -37,10 +31,29 @@ Col
 <input  [(ngModel)]  = "selCol">
 {{selCol}}
 <button (click)="showEl()">xxxx</button>
+,<button (click)="readGrid()">Recognise grid</button>
 <div>
   <canvas #elOutput id="elOutput"></canvas>
 </div>
 {{ocrOutput}}
+<div>
+  <div fxLayout="column">
+
+    <div *ngFor="let row of rows">
+      <div fxLayout="row">
+
+        <div *ngFor="let content of gridContents |  slice: 0 + row * 9 : 9 + row * 9; let i = index ">
+          <app-cell (cellSelected)="cellSelected($event)" (newValue)="setNewValue($event)"
+            [cellOption]="gridContents[i + row * 9 ]" [killerInput]="isKillerInput"></app-cell>
+        </div>
+
+
+
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
