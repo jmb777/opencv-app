@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { OpenCVOptions } from 'projects/ng-open-cv/src/public_api';
 import { FormsModule } from "@angular/forms";
 import { CellComponent } from './cell/cell.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 const openCVConfig: OpenCVOptions = {
   scriptUrl: `assets/opencv/opencv.js`,
@@ -19,7 +20,8 @@ const openCVConfig: OpenCVOptions = {
   imports: [
     BrowserModule,
     NgOpenCVModule.forRoot(openCVConfig),
-    FormsModule
+    FormsModule,
+    FlexLayoutModule
   ],
   providers: [],
   bootstrap: [AppComponent]
