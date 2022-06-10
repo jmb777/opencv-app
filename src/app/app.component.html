@@ -7,36 +7,36 @@
         <canvas #canvasInput id="canvasInput"></canvas>
       </td>
       <td>
-        <canvas #canvasOutput id="canvasOutput"></canvas>
+        <canvas hidden #canvasOutput id="canvasOutput" ></canvas>
       </td>
     </tr>
     <tr>
       <td>
-        <div class="caption">canvasInput <input (change)="readDataUrl($event)" #fileInput type="file" id="fileInput"
+        <div class="caption">Select photo <input (change)="readDataUrl($event)" #fileInput type="file" id="fileInput"
             name="file" accept="image/*" /></div>
       </td>
-      <td>
+      <!-- <td>
         <div class="caption">canvasOutput</div>
-      </td>
+      </td> -->
     </tr>
   </table>
 </div>
 <div>
   <!-- <div class="control"><button id="tryIt" (click)="detectFace()" [disabled]="!classifiersLoaded$ | async">Detect Face</button></div> -->
-  <div class="control"><button id="tryIt" (click)="findContours()" >Detect Contours</button></div>
+  <!-- <div class="control"><button id="tryIt" (click)="findContours()" >Detect Contours</button></div> -->
 </div>
-Row
+<!-- Row
 <input  [(ngModel)]  = "selRow">
 Col
 <input  [(ngModel)]  = "selCol">
 {{selCol}}
-<button (click)="showEl()">xxxx</button>
-,<button (click)="readGrid1()">Recognise grid</button>
+<button (click)="showEl('cell')">xxxx</button> -->
+<button (click)="showEl('grid')">Recognise grid</button>
 <div>
-  <canvas #elOutput id="elOutput"></canvas>
+  <canvas hidden #elOutput id="elOutput"></canvas>
 </div>
-{{ocrOutput}}
-<div>
+
+<div *ngIf = "showGrid">
   <div fxLayout="column">
 
     <div *ngFor="let row of rows">
@@ -54,6 +54,8 @@ Col
 
   </div>
 </div>
+{{ocrResult}}
+<button (click)="test()">test</button>
 
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->

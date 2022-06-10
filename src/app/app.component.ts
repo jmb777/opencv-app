@@ -46,6 +46,7 @@ export class AppComponent {
   colourIndex = 0;
   killer: Killer = new Killer();
   puzzleType = 'killer';
+  showGrid = false;
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
@@ -116,6 +117,7 @@ export class AppComponent {
 
   readDataUrl(event: any) {
     if (event.target.files.length) {
+      this.showGrid = false;
       const reader = new FileReader();
       const load$ = fromEvent(reader, 'load');
       load$
@@ -166,11 +168,11 @@ export class AppComponent {
     // let img = 
 
     cv.imshow(this.canvasOutput.nativeElement.id, src);
-    try {
-      // this.doOCR(this.grid);
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   // this.doOCR(this.grid);
+    // } catch (error) {
+    //   console.log(error);
+    // }
 
     src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
 
@@ -216,8 +218,8 @@ export class AppComponent {
         if (longRight && longDown && !shortLeft && !shortUp) {
 
           topLeftCoords.push(new Coord(i, j));
-          console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
-          console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
+          // console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
+          // console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
         }
         if (longLeft && longDown && !shortRight && !shortUp) {
 
@@ -437,105 +439,106 @@ export class AppComponent {
     return (n < 0) ? 0 : n;
   }
 
-  getCount(x: number, y: number, data: any, offset: number, length: number, dir: string): any {
-    let pixelPresent = 0;
-    for (let yy = y - offset; yy < y + offset + 1; yy++) {
-      for (let xx = 0; xx < length + 1; xx++) {
-        if (data.ucharAt(yy, (x + xx) * data.channels() + 1) > 0) {
-          pixelPresent++;
-        }
-      }
-    }
-    return pixelPresent;
-  }
-  test() {
-    console.log('clicked');
-  }
+  // getCount(x: number, y: number, data: any, offset: number, length: number, dir: string): any {
+  //   let pixelPresent = 0;
+  //   for (let yy = y - offset; yy < y + offset + 1; yy++) {
+  //     for (let xx = 0; xx < length + 1; xx++) {
+  //       if (data.ucharAt(yy, (x + xx) * data.channels() + 1) > 0) {
+  //         pixelPresent++;
+  //       }
+  //     }
+  //   }
+  //   return pixelPresent;
+  // }
+  // test() {
+  //   console.log('clicked');
+  // }
 
-  async readGrid1() {
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        this.selRow = row;
-        this.selCol = col;
-        await this.showEl();
-        // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+  // async readGrid1() {
+  //   for (let row = 0; row < 9; row++) {
+  //     for (let col = 0; col < 9; col++) {
+  //       this.selRow = row;
+  //       this.selCol = col;
+  //       await this.showEl();
+  //       // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
 
-        // const img = canvas.toDataURL('image/png');
-        // await this.doOCR(row, col, img);
-      }
-    }
-  }
+  //       // const img = canvas.toDataURL('image/png');
+  //       // await this.doOCR(row, col, img);
+  //     }
+  //   }
+  // }
 
-  async readGrid() {
-    let src = cv.imread('canvasOutput');
-    cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
-    let dst = new cv.Mat();
-    let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-    let ctx = canvas.getContext('2d');
-    let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  // async readGrid() {
+  //   let src = cv.imread('canvasOutput');
+  //   cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
+  //   let dst = new cv.Mat();
+  //   let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+  //   let ctx = canvas.getContext('2d');
+  //   let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    this.ocrResult = "Recognising...";
-    const worker = createWorker({
-      // logger: m => console.log(m),
-    });
+  //   this.ocrResult = "Recognising...";
+  //   const worker = createWorker({
+  //     // logger: m => console.log(m),
+  //   });
 
-    await worker.load();
-    await worker.loadLanguage('eng');
+  //   await worker.load();
+  //   await worker.loadLanguage('eng');
 
-    await worker.initialize('eng');
-    await worker.setParameters({
-      tessedit_char_whitelist: '123456789'
-    });
-    await worker.setParameters({
-      tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
-    });
-    // await worker.recognize(this.elOutput.nativeElement.id);
-    for (let i = 0; i < 81; i++) {
-      this.gridContents[i].values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-      this.gridContents[i].uniqueValue = null;
-    }
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        let r = new Rectangle(this.grid[row][col], this.grid[row + 1][col + 1]);
-        let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
-        dst = src.roi(rect);
-        // let count = 0;
-        // for (let i = 0; i < dst.rows; i++) {
-        //   for (let j = 0; j < dst.cols; j++) {
-        //     if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
-        //   }
-        // }
-        // console.log('count = ' + count + '  Diff pixels ' + ((dst.rows * dst.cols - count) < 10));
-        // if (!((dst.rows * dst.cols - count) < 10)) {
-        cv.imshow(this.elOutput.nativeElement.id, dst);
+  //   await worker.initialize('eng');
+  //   await worker.setParameters({
+  //     tessedit_char_whitelist: '123456789'
+  //   });
+  //   await worker.setParameters({
+  //     tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
+  //   });
+  //   // await worker.recognize(this.elOutput.nativeElement.id);
+  //   for (let i = 0; i < 81; i++) {
+  //     this.gridContents[i].values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  //     this.gridContents[i].uniqueValue = null;
+  //   }
+  //   for (let row = 0; row < 9; row++) {
+  //     for (let col = 0; col < 9; col++) {
+  //       let r = new Rectangle(this.grid[row][col], this.grid[row + 1][col + 1]);
+  //       let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
+  //       dst = src.roi(rect);
+  //       // let count = 0;
+  //       // for (let i = 0; i < dst.rows; i++) {
+  //       //   for (let j = 0; j < dst.cols; j++) {
+  //       //     if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
+  //       //   }
+  //       // }
+  //       // console.log('count = ' + count + '  Diff pixels ' + ((dst.rows * dst.cols - count) < 10));
+  //       // if (!((dst.rows * dst.cols - count) < 10)) {
+  //       cv.imshow(this.elOutput.nativeElement.id, dst);
 
-        const img = canvas.toDataURL('image/png');
-        const { data: { text } } = await worker.recognize(img);
-        console.log('Row ' + row + '   Col ' + col + '  Character ' + text);
-        if (!isNaN(parseInt(text))) {
-          this.gridContents[row * 9 + col].values = [parseInt(text)];
-          this.gridContents[row * 9 + col].uniqueValue = parseInt(text);
-        }
+  //       const img = canvas.toDataURL('image/png');
+  //       const { data: { text } } = await worker.recognize(img);
+  //       // console.log('Row ' + row + '   Col ' + col + '  Character ' + text);
+  //       if (!isNaN(parseInt(text))) {
+  //         this.gridContents[row * 9 + col].values = [parseInt(text)];
+  //         this.gridContents[row * 9 + col].uniqueValue = parseInt(text);
+  //       }
 
-        // } else {
-        // console.log('Row ' + row + '   Col ' + col + '  Character ');
-        // }
+  //       // } else {
+  //       // console.log('Row ' + row + '   Col ' + col + '  Character ');
+  //       // }
 
-      }
-    }
-    // const img = canvas.toDataURL('image/png');
-    // const { data: { text } } = await worker.recognize(img);
-    // console.log(text);
-    // this.ocrOutput = text;
-    await worker.terminate();
-    //   }
-    // }  
+  //     }
+  //   }
+  //   // const img = canvas.toDataURL('image/png');
+  //   // const { data: { text } } = await worker.recognize(img);
+  //   // console.log(text);
+  //   // this.ocrOutput = text;
+  //   await worker.terminate();
+  //   //   }
+  //   // }  
 
-    // this.ocrResult = words;
-    // console.log(words);
-  }
+  //   // this.ocrResult = words;
+  //   // console.log(words);
+  // }
 
-  async doOCR(image) {
+  async doOCR(scope) {
+    this.gridContents = [];
     for (let index = 0; index < 81; index++) {
       this.gridContents.push(new CellOption([1, 2, 3, 4, 5, 6, 7, 8, 9], index));
 
@@ -556,56 +559,79 @@ export class AppComponent {
     await worker.setParameters({
       tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
     });
-    // await worker.recognize(this.elOutput.nativeElement.id);
-    // for (let row = 0; row < 9; row++) {
-    //   for (let col = 0; col < 9; col++) {
-    //     let r = new Rectangle(grid[row][col], grid[row + 1][col + 1]);
-    // const img =  canvas.toDataURL('image/png');
-    // const { data: { text } } = await worker.recognize(image);
-    let chars: string[] = [];
-    for (let row = 0; row < 9; row++) {
-      for (let col = 0; col < 9; col++) {
-        let { data: { text, confidence } } = await worker.recognize(this.getElementData(row, col));
-        if (confidence < 70) { text = '' }
-        chars.push(text);
+
+    if (scope == 'grid') {
+      let chars: string[] = [];
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          let img = this.getElementData(row, col);
+          if (img) {
+            let { data: { text, confidence, symbols } } = await worker.recognize(img);
+            symbols.sort((s1, s2) => s2.confidence - s1.confidence);
+            text = symbols[0].text;
+              chars.push(text);
+            
+          }
+          else {
+            chars.push('');
+          }
+
+        }
       }
+      // console.log(chars);
+      chars.forEach((value, index) => {
+        if (value !== '') {
+          this.gridContents[index].values = [Number(value)];
+          this.gridContents[index].uniqueValue = Number(value);
+        }
+
+      });
     }
-    // this.ocrOutput = text;
-    // if (!isNaN(parseInt(text))) {
-    //   this.gridContents[row * 9 + col].values = [parseInt(text)];
-    //   this.gridContents[row * 9 + col].uniqueValue = parseInt(text);
-    // }
+
+    if (scope == 'cell') {
+      if (this.getElementData(this.selRow, this.selCol)) {
+        let { data: { text, confidence,symbols } } = await worker.recognize(this.getElementData(this.selRow, this.selCol));
+      // console.log('cell content  ' + text + Number(this.selRow * 9 + this.selCol));
+      // console.log(this.gridContents[this.selRow * 9 + this.selCol].values);
+      
+      symbols.sort((s1, s2) => s2.confidence - s1.confidence);
+      text = symbols[0].text;
+      this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].values = [Number(text)];
+      this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].uniqueValue = Number(text);
+      
+
+      // console.log(symbols);
+      }
+
+      
+    }
+
+    this.showGrid = true;
+    this.ocrResult = '';
+
     await worker.terminate();
-    console.log(chars);
-    chars.forEach((value, index) => {
-      if (value !== '') {
-        this.gridContents[index].values = [Number(value)];
-        this.gridContents[index].uniqueValue = Number(value);
-      }
 
-    });
-    // this.ocrOutput = text;
-    // this.gridContents[0].values = [Number(text)];
-    // this.gridContents[0].uniqueValue = Number(text);
-    // return text;
-    // return new Promise(function (resolve, reject) { resolve(text) });
 
-    //   }
-    // }  
-
-    // this.ocrResult = words;
-    // console.log(words);
 
   }
-  showGrid() {
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        this.selRow = i;
-        this.selCol = j;
-        this.showEl();
-      }
+  imgInfo(dst: any) {
+    let midRow = Math.floor(dst.rows / 2);
+    // console.log('row ' + midRow);
+    let max = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());
+    let min = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());;
+    
+    for (let col = Math.floor(dst.cols / 10); col < dst.cols - Math.floor(dst.cols / 10); col++) {
+      // console.log(dst.ucharAt(midRow, col * dst.channels()) + ' ' + dst.ucharAt(midRow, col * dst.channels() + 1)
+        // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 2)
+        // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 3));
+
+      if (dst.ucharAt(midRow, col * dst.channels()) > max) { max = dst.ucharAt(midRow, col * dst.channels()); }
+      if (dst.ucharAt(midRow, col * dst.channels()) < min) { min = dst.ucharAt(midRow, col * dst.channels()); }
     }
+    // console.log((max - min) > 50);
+    return ((max - min) > 50);
   }
+
 
   getElementData(row: number, col: number) {
     let src = cv.imread('canvasOutput');
@@ -613,55 +639,40 @@ export class AppComponent {
     let r = new Rectangle(this.grid[row][col], this.grid[Number(row) + 1][Number(col) + 1]);
     let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
     dst = src.roi(rect);
-    cv.imshow(this.elOutput.nativeElement.id, dst);
-    let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-    return canvas.toDataURL('image/png');
+    if (this.imgInfo(dst)) {
+      // cv.threshold(dst, dst, 128, 255, cv.THRESH_OTSU);
+      cv.imshow(this.elOutput.nativeElement.id, dst);
+      let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+      return canvas.toDataURL('image/png');
+    } else {
+      return null;
+    };
+
+
+
 
   }
-  showEl() {
-    this.ocrResult = '';
-    let src = cv.imread('canvasOutput');
-    // cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
-    let dst = new cv.Mat();
-    // You can try more different parameters
-    let r = new Rectangle(this.grid[this.selRow][this.selCol], this.grid[Number(this.selRow) + 1][Number(this.selCol) + 1]);
-    let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
-
-
-    dst = src.roi(rect);
-    cv.threshold(dst, dst, 128, 255, cv.THRESH_BINARY);
-    // let count = 0;
-    // for (let i = 0; i < dst.rows; i++) {
-    //   for (let j = 0; j < dst.cols; j++) {
-    //     if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
-    //   }
-    // }
-    // console.log('count = ' + count);
-    cv.imshow(this.elOutput.nativeElement.id, dst);
+  showEl(scope) {
     try {
-      let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+      this.findContours();
+    } catch (error) {
+      this.ocrResult = 'Unable to detect grid';
+      return;
+    }
+    
 
-      const img = canvas.toDataURL('image/png');
-      this.doOCR(img);
-      // console.log(response);
-      // this.ocrOutput = String(response);
-      // this.doOCR(img).then(
-      //   data => {
-      //     // if (!isNaN(parseInt(String(data)))) {
-      //     //   this.ocrOutput = String(data);
-      //     //   this.gridContents[this.selRow * 9 + this.selCol].values = [parseInt(String(data))];
-      //     //   this.gridContents[this.selRow * 9 + this.selCol].uniqueValue = parseInt(String(data));
-      //     // }
+    try {
 
-      //     console.log(data + 'xxxxxxxxxxxxxxxxxxxxxx')
-      //   }
-      // );
+      this.doOCR(scope);
+
     } catch (error) {
       console.log(error);
     }
 
-    src.delete();
-    dst.delete();
+
+  }
+  test(){
+    console.log('test');
   }
   cellSelected(cell: CellOption) {
     if (this.isKillerInput) {
