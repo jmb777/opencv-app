@@ -1,13 +1,11 @@
-
-
-<div>
+<div >
   <table cellpadding="0" cellspacing="0" width="0" border="0">
     <tr>
       <td>
         <canvas #canvasInput id="canvasInput"></canvas>
       </td>
       <td>
-        <canvas hidden #canvasOutput id="canvasOutput" ></canvas>
+        <canvas #canvasOutput id="canvasOutput"></canvas>
       </td>
     </tr>
     <tr>
@@ -20,43 +18,59 @@
       </td> -->
     </tr>
   </table>
-</div>
-<div>
-  <!-- <div class="control"><button id="tryIt" (click)="detectFace()" [disabled]="!classifiersLoaded$ | async">Detect Face</button></div> -->
-  <!-- <div class="control"><button id="tryIt" (click)="findContours()" >Detect Contours</button></div> -->
-</div>
-<!-- Row
-<input  [(ngModel)]  = "selRow">
-Col
-<input  [(ngModel)]  = "selCol">
-{{selCol}}
-<button (click)="showEl('cell')">xxxx</button> -->
-<button (click)="showEl('grid')">Recognise grid</button>
-<div>
-  <canvas hidden #elOutput id="elOutput"></canvas>
-</div>
+  <button (click)="showEl('grid')">Recognise grid</button>
+  <button (click)="test()">test</button>
+  <button (click)="scan()">Scan puzzle</button>
 
-<div *ngIf = "showGrid">
-  <div fxLayout="column">
+  <div>
+    <canvas  #elOutput id="elOutput"></canvas>
+  </div>
 
-    <div *ngFor="let row of rows">
-      <div fxLayout="row">
+  <div *ngIf="showGrid">
+    <div fxLayout="column">
 
-        <div *ngFor="let content of gridContents |  slice: 0 + row * 9 : 9 + row * 9; let i = index ">
-          <app-cell (cellSelected)="cellSelected($event)" (newValue)="setNewValue($event)"
-            [cellOption]="gridContents[i + row * 9 ]" [killerInput]="isKillerInput"></app-cell>
+      <div *ngFor="let row of rows">
+        <div fxLayout="row">
+
+          <div *ngFor="let content of gridContents |  slice: 0 + row * 9 : 9 + row * 9; let i = index ">
+            <app-cell (cellSelected)="cellSelected($event)" (newValue)="setNewValue($event)"
+              [cellOption]="gridContents[i + row * 9 ]" [killerInput]="isKillerInput"></app-cell>
+          </div>
+
+
+
         </div>
-
-
-
       </div>
+
     </div>
 
   </div>
-</div>
-{{ocrResult}}
-<button (click)="test()">test</button>
+  {{ocrResult}}
 
+</div>
+
+
+
+
+
+<div>
+
+
+
+  <br>
+  <button (click)="startVideo(true)">Start video</button>
+  <button (click)="grabFrame()">Grab frame</button>
+  <button (click)="stopVideo()">Stop video</button>
+  
+    <video hidden class="videoInput" #videoInput id="videoInput" playsinline=true></video>
+    
+      <!-- <canvas class="overlay" #overlayCan id="overlayCan" height="240px" width="320px"></canvas> -->
+    
+  
+
+
+
+</div>
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
 <!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
@@ -64,4 +78,3 @@ Col
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * End of Placeholder * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-

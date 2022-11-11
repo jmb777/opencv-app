@@ -47,6 +47,12 @@ export class AppComponent {
   killer: Killer = new Killer();
   puzzleType = 'killer';
   showGrid = false;
+  streaming = false;
+  mainView = true;
+  cameraView = false;
+  @ViewChild('overlayCan') overlayCan: ElementRef;
+  video: HTMLVideoElement = document.getElementById('videoInput') as HTMLVideoElement;
+  localStream: MediaStream;
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
@@ -569,8 +575,8 @@ export class AppComponent {
             let { data: { text, confidence, symbols } } = await worker.recognize(img);
             symbols.sort((s1, s2) => s2.confidence - s1.confidence);
             text = symbols[0].text;
-              chars.push(text);
-            
+            chars.push(text);
+
           }
           else {
             chars.push('');
@@ -590,20 +596,20 @@ export class AppComponent {
 
     if (scope == 'cell') {
       if (this.getElementData(this.selRow, this.selCol)) {
-        let { data: { text, confidence,symbols } } = await worker.recognize(this.getElementData(this.selRow, this.selCol));
-      // console.log('cell content  ' + text + Number(this.selRow * 9 + this.selCol));
-      // console.log(this.gridContents[this.selRow * 9 + this.selCol].values);
-      
-      symbols.sort((s1, s2) => s2.confidence - s1.confidence);
-      text = symbols[0].text;
-      this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].values = [Number(text)];
-      this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].uniqueValue = Number(text);
-      
+        let { data: { text, confidence, symbols } } = await worker.recognize(this.getElementData(this.selRow, this.selCol));
+        // console.log('cell content  ' + text + Number(this.selRow * 9 + this.selCol));
+        // console.log(this.gridContents[this.selRow * 9 + this.selCol].values);
 
-      // console.log(symbols);
+        symbols.sort((s1, s2) => s2.confidence - s1.confidence);
+        text = symbols[0].text;
+        this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].values = [Number(text)];
+        this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].uniqueValue = Number(text);
+
+
+        // console.log(symbols);
       }
 
-      
+
     }
 
     this.showGrid = true;
@@ -619,11 +625,11 @@ export class AppComponent {
     // console.log('row ' + midRow);
     let max = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());
     let min = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());;
-    
+
     for (let col = Math.floor(dst.cols / 10); col < dst.cols - Math.floor(dst.cols / 10); col++) {
       // console.log(dst.ucharAt(midRow, col * dst.channels()) + ' ' + dst.ucharAt(midRow, col * dst.channels() + 1)
-        // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 2)
-        // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 3));
+      // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 2)
+      // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 3));
 
       if (dst.ucharAt(midRow, col * dst.channels()) > max) { max = dst.ucharAt(midRow, col * dst.channels()); }
       if (dst.ucharAt(midRow, col * dst.channels()) < min) { min = dst.ucharAt(midRow, col * dst.channels()); }
@@ -659,7 +665,7 @@ export class AppComponent {
       this.ocrResult = 'Unable to detect grid';
       return;
     }
-    
+
 
     try {
 
@@ -671,7 +677,7 @@ export class AppComponent {
 
 
   }
-  test(){
+  test() {
     console.log('test');
   }
   cellSelected(cell: CellOption) {
@@ -777,7 +783,175 @@ export class AppComponent {
     const next = e.key + 1;
     // setTimeout(() => {this.viewChildren.toArray()[next].inputElement.nativeElement.focus();},0);
   }
+  xxx() {
+    console.log('xxx');
+  }
+  // openCamera() {
+  //   this.startVideo();
+  //   // let video = document.getElementById('videoInput') as HTMLVideoElement;
+  //   // console.log(video.height);
+  // }
+  async startVideo(action: boolean) {
+    this.streaming = !this.streaming;
+    let streaming = action;
+    let video = document.getElementById('videoInput') as HTMLVideoElement;
+    var ref = this;
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(async function (stream) {
+        ref.localStream = stream;
+        video.srcObject = stream;
+        // video.onloadedmetadata = function (e) { video.play() }
+        await video.play();
+        console.log(video.offsetWidth);
+        console.log(video.offsetHeight);
+        video.height = video.videoHeight;
+        video.width = video.videoWidth;
+        let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+        let dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
 
+        let cap = new cv.VideoCapture(video);
+        const FPS = 30;
+        
+        function processVideo() {
+          try {
+            if (!streaming) {
+              // clean and stop.
+              // video.pause();
+              // video.srcObject = null;
+              src.delete();
+              dst.delete();
+              stream.getTracks().forEach(track => track.stop());
+              return;
+            }
+            let begin = Date.now();
+            // start processing.
+            cap.read(src);
+            // cv.rectangle(video, new cv.Point(50, 20), new cv.Point(270, 220), [255, 0, 0, 255], 2);
+            // cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+            cv.rectangle(src, new cv.Point(50,50), new cv.Point(video.width-50, video.height-50), [255, 0, 0, 255], 1);
+            cv.imshow('canvasOutput', src);
+
+            //  cv.imshow(this.overlayCan.nativeElement.id, ovl);
+            // schedule the next one.
+            let delay = 1000 / FPS - (Date.now() - begin);
+            // console.log(delay);
+            setTimeout(processVideo, delay);
+          } catch (err) {
+            console.log(err);
+          }
+        };
+        setTimeout(processVideo, 0);
+
+        // 
+
+        // this.video = video;
+        
+      })
+    
+
+      
+      .catch(function (err) {
+        console.log("An error occurred! " + err);
+      });
+
+
+    // let ovl = new cv.Mat.zeros(250, 320, cv.CV_8UC4);
+    // let ovl = cv.imread(this.canvasInput.nativeElement.id);
+
+    // cv.rectangle(ovl , new cv.Point(50, 20), new cv.Point(270, 220), [255, 0, 0, 255], 2);
+    //  cv.imshow(this.overlayCan.nativeElement.id, ovl);
+
+
+    // const FPS = 30;
+
+    //   setTimeout(grabFrame, 100);
+    //   while(streaming){
+    //     setTimeout(grabFrame, 100);
+    //   }
+
+
+    //  function grabFrame(){
+    //   cap.read(src);
+    //   cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+    //   cv.imshow('canvasOutput', dst);
+    //  }
+    // this.getFrame(cap, src, dst); 
+
+
+    // cap.read(src);
+    //     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+    //     cv.imshow('canvasOutput', dst);
+    // schedule the first one.
+
+    // this.grabVideo(video,src, dst, cap); 
+    // this.grabVideo(video,src, dst, cap);
+
+    //     let video = document.getElementById("video") as HTMLVideoElement; // video is the id of video tag
+    // navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    //     .then(function(stream) {
+    //         video.srcObject = stream;
+    //         video.play();
+    //     })
+    //     .catch(function(err) {
+    //         console.log("An error occurred! " + err);
+    //     });
+  }
+  stopVideo(){
+    this.localStream.getTracks().forEach(track => track.stop());
+  }
+  getFrame(cap: any, src: any, dst: any) {
+    setTimeout(() => {
+      // cap.read(src);
+      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+      cv.imshow('canvasOutput', dst);
+    }, 100);
+  }
+
+  grabVideo(video: HTMLVideoElement, src: any, dst: any, cap: any) {
+    try {
+      // if (!streaming) {
+      //     // clean and stop.
+      //     video.pause();
+      //     // video.srcObject = null;
+      //     src.delete();
+      //     dst.delete();
+      //     return;
+      // }
+      let begin = Date.now();
+      // start processing.
+      while (true) {
+        cap.read(src);
+        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+        this.showEl('grid');
+        console.log(Date.now());
+      }
+
+      // cv.imshow('canvasOutput', dst);
+
+      this.showEl('grid');
+      // schedule the next one.
+      let delay = 1000 / 30 - (Date.now() - begin);
+      // function
+      // setTimeout(function(){this.grabVideo(video,src, dst, cap)}, delay);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  grabFrame() {
+    let src = cv.imread(this.canvasOutput.nativeElement.id);
+    cv.imshow(this.elOutput.nativeElement.id, src);
+    // let video = document.getElementById('videoInput') as HTMLVideoElement;
+    // let cap = new cv.VideoCapture(video);
+    // let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    // cap.read(src);
+    // cv.imshow('canvasOutput', src);
+    src.delete();
+  }
+
+  scan() {
+    this.mainView = !this.mainView;
+    this.cameraView = !this.cameraView;
+  }
   // findCorners() {
   //   let src = cv.imread(this.canvasInput.nativeElement.id);
   //   let dst = cv.Mat.ones(src.rows, src.cols, cv.CV_8UC3);
