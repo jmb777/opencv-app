@@ -2,10 +2,10 @@
   <table cellpadding="0" cellspacing="0" width="0" border="0">
     <tr>
       <td>
-        <canvas #canvasInput id="canvasInput"></canvas>
+        <canvas  #canvasInput id="canvasInput"></canvas>
       </td>
       <td>
-        <canvas #canvasOutput id="canvasOutput"></canvas>
+        <canvas  #canvasOutput id="canvasOutput"></canvas>
       </td>
     </tr>
     <tr>
@@ -18,15 +18,25 @@
       </td> -->
     </tr>
   </table>
+  <!-- <input [(ngModel)]="selRow" >Row
+  <input [(ngModel)]="selCol" >Col -->
   <button (click)="showEl('grid')">Recognise grid</button>
-  <button (click)="test()">test</button>
+  <button (click)="showEl('cell')">test</button>
   <button (click)="scan()">Scan puzzle</button>
 
   <div>
-    <canvas  #elOutput id="elOutput"></canvas>
+    <canvas hidden  #elOutput id="elOutput"></canvas>
+    
+  </div>
+  {{txt}}
+  <!-- <div>
+    <canvas  #canvasVideo id="canvasVideo"></canvas>
+  </div> -->
+  <div>
+    <canvas  #canvasVideoRaw id="canvasVideoRaw"></canvas>
   </div>
 
-  <div *ngIf="showGrid">
+  <!-- <div *ngIf="showGrid">
     <div fxLayout="column">
 
       <div *ngFor="let row of rows">
@@ -44,7 +54,7 @@
 
     </div>
 
-  </div>
+  </div> -->
   {{ocrResult}}
 
 </div>
@@ -61,8 +71,16 @@
   <button (click)="startVideo(true)">Start video</button>
   <button (click)="grabFrame()">Grab frame</button>
   <button (click)="stopVideo()">Stop video</button>
-  
-    <video hidden class="videoInput" #videoInput id="videoInput" playsinline=true></video>
+  <div class="videoInput">
+    <video   #videoInput id="videoInput" playsinline=true></video>
+    <!-- <div >Some text</div> -->
+    <div class="overlay">
+      <canvas  #canvasVideo id="canvasVideo"></canvas>
+    </div>
+    <div>{{cameraText}}</div>
+
+  </div>
+    
     
       <!-- <canvas class="overlay" #overlayCan id="overlayCan" height="240px" width="320px"></canvas> -->
     
@@ -71,6 +89,39 @@
 
 
 </div>
+
+<h1>Angular Router App</h1>
+<div *ngIf="showGrid">
+  <div fxLayout="column">
+
+    <div *ngFor="let row of rows">
+      <div fxLayout="row">
+
+        <div *ngFor="let content of gridContents |  slice: 0 + row * 9 : 9 + row * 9; let i = index ">
+          <!-- <app-cell (cellSelected)="cellSelected($event)" (newValue)="setNewValue($event)"
+            [cellOption]="gridContents[i + row * 9 ]" [killerInput]="isKillerInput"></app-cell> -->
+
+            <div class="gridBox">{{gridContents[i + row * 9].uniqueValue}}</div>
+        </div>
+
+
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<!-- This nav gives you links to click, which tells the router which route to use (defined in the routes constant in  AppRoutingModule) -->
+<!-- <nav>
+  <ul>
+    <li><a [routerLink]="['sudoku.component.ts']" routerLinkActive="active" ariaCurrentWhenActive="page">First Component</a></li>
+    <li><a routerLink="AppComponent" routerLinkActive="active" ariaCurrentWhenActive="page">Second Component</a></li>
+  </ul>
+</nav> -->
+<!-- The routed views render in the <router-outlet>-->
+
+<!-- <router-outlet></router-outlet> -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
 <!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->

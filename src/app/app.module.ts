@@ -7,11 +7,18 @@ import { FormsModule } from "@angular/forms";
 import { CellComponent } from './cell/cell.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
+
+
+
 const openCVConfig: OpenCVOptions = {
   scriptUrl: `assets/opencv/opencv.js`,
   wasmBinaryFile: 'wasm/opencv_js.wasm',
   usingWasm: true
 };
+// const routes: Routes = [
+//   {path: 'sudoku.component.ts', component: SudokuComponent},
+//   {path: 'app.component.ts', component: AppComponent}
+// ];
 @NgModule({
   declarations: [
     AppComponent,
@@ -22,6 +29,7 @@ const openCVConfig: OpenCVOptions = {
     NgOpenCVModule.forRoot(openCVConfig),
     FormsModule,
     FlexLayoutModule
+    // RouterModule.forRoot(routes, {enableTracing: true})
   ],
   providers: [],
   bootstrap: [AppComponent]

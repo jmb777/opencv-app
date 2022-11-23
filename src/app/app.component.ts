@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { CellComponent } from './cell/cell.component';
 import { CellOption } from './classes/cellOption';
 import { Killer } from './classes/killer';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -50,9 +51,17 @@ export class AppComponent {
   streaming = false;
   mainView = true;
   cameraView = false;
-  @ViewChild('overlayCan') overlayCan: ElementRef;
+  @ViewChild('canvasVideo') canvasVideo: ElementRef;
+  @ViewChild('canvasVideoRaw') canvasVideoRaw: ElementRef;
   video: HTMLVideoElement = document.getElementById('videoInput') as HTMLVideoElement;
   localStream: MediaStream;
+  cameraText = '';
+  videoRunning = false;
+  gridFound = false;
+  recognitionComplete = false;
+  attemptNumber = 0;
+  txt = '';
+  canvasInputWidth: any;
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
@@ -93,6 +102,8 @@ export class AppComponent {
       this.gridContents.push(new CellOption([1, 2, 3, 4, 5, 6, 7, 8, 9], index));
 
     }
+
+  
     // setTimeout(() => { this.viewChildren.toArray()[0].inputElement.nativeElement.focus(); }, 0);
   }
 
@@ -126,9 +137,14 @@ export class AppComponent {
       this.showGrid = false;
       const reader = new FileReader();
       const load$ = fromEvent(reader, 'load');
+      let cv1 = cv;
       load$
         .pipe(
           switchMap(() => {
+            // let cvs = document.createElement('canvas');
+            // cv1.imshow(cvs, `${reader.result}`);
+            // console.log(cvs.width);
+            // cvs.remove();
             return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasInput.nativeElement);
           })
         )
@@ -141,8 +157,12 @@ export class AppComponent {
       reader.readAsDataURL(event.target.files[0]);
     }
   }
+  canvasInputChange(){
+    console.log('Canvas event');
+    // this.canvasInputWidth = this.canvasInput.nativeElement.width;
+  }
 
-  findContours() {
+  findContours(): boolean {
 
     let src = cv.imread(this.canvasInput.nativeElement.id);
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
@@ -156,18 +176,19 @@ export class AppComponent {
     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
 
     let contours = new cv.MatVector();
-    let hierarchy = new cv.Mat();
+    // let hierarchy = new cv.Mat();
 
 
 
 
-    let ksize = new cv.Size(4, 4);
+    // let ksize = new cv.Size(4, 4);
     let anchor = new cv.Point(-1, -1);
     let M = cv.Mat.ones(4, 4, cv.CV_8U);
     cv.Canny(dst, dst, 50, 100, 3, true);
 
 
     cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+
     this.grid = this.detectCorners(dst, src, 75, 5, 5);
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     // cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
@@ -180,7 +201,11 @@ export class AppComponent {
     //   console.log(error);
     // }
 
-    src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
+    src.delete(); dst.delete(); contours.delete();
+    if (this.grid.length == 0) {
+      return false;
+    }
+    return true;
 
   }
 
@@ -277,6 +302,7 @@ export class AppComponent {
     }
 
 
+
     return coords;
 
   }
@@ -356,6 +382,9 @@ export class AppComponent {
     return (n > max) ? max : n;
   }
   findSquare(topLeftCoords: Coord[], topRightCoords: Coord[], bottomLeftCoords: Coord[], bottomRightCoords: Coord[], sensitivity: number): Coord[] {
+    if (topLeftCoords.length == 0 || topRightCoords.length == 0 || bottomLeftCoords.length == 0 || bottomRightCoords.length == 0) {
+      return [];
+    }
     let topLeftGrouped: Coord[] = this.groupCoords(topLeftCoords, sensitivity);
     let topRightGrouped: Coord[] = this.groupCoords(topRightCoords, sensitivity);
     let bottomLeftGrouped: Coord[] = this.groupCoords(bottomLeftCoords, sensitivity);
@@ -570,12 +599,15 @@ export class AppComponent {
       let chars: string[] = [];
       for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
-          let img = this.getElementData(row, col);
+          let img =  this.getElementData(row, col);
           if (img) {
+            // this.txt = 'befoe recognize';
             let { data: { text, confidence, symbols } } = await worker.recognize(img);
+            this.txt = 'after recognise';
             symbols.sort((s1, s2) => s2.confidence - s1.confidence);
             text = symbols[0].text;
             chars.push(text);
+            // this.txt = text;
 
           }
           else {
@@ -639,7 +671,7 @@ export class AppComponent {
   }
 
 
-  getElementData(row: number, col: number) {
+   getElementData(row: number, col: number) {
     let src = cv.imread('canvasOutput');
     let dst = new cv.Mat();
     let r = new Rectangle(this.grid[row][col], this.grid[Number(row) + 1][Number(col) + 1]);
@@ -647,8 +679,12 @@ export class AppComponent {
     dst = src.roi(rect);
     if (this.imgInfo(dst)) {
       // cv.threshold(dst, dst, 128, 255, cv.THRESH_OTSU);
-      cv.imshow(this.elOutput.nativeElement.id, dst);
       let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+      cv.imshow(this.elOutput.nativeElement.id, dst);
+      // let ctx = canvas.getContext('2d');
+      // let data = ctx.getImageData(0,0,canvas.width,canvas.height);
+      // console.log(data);
+      // this.txt=canvas.toDataURL('image/png');
       return canvas.toDataURL('image/png');
     } else {
       return null;
@@ -658,7 +694,7 @@ export class AppComponent {
 
 
   }
-  showEl(scope) {
+  async showEl(scope) {
     try {
       this.findContours();
     } catch (error) {
@@ -669,7 +705,7 @@ export class AppComponent {
 
     try {
 
-      this.doOCR(scope);
+      await this.doOCR(scope);
 
     } catch (error) {
       console.log(error);
@@ -677,8 +713,39 @@ export class AppComponent {
 
 
   }
+
+    // this.findContours();
+    // this.doOCR(scope);
+    // if (!this.gridFound) {
+    //   if (this.findContours()) {
+    //     this.gridFound = true;
+    //     return;
+    //   }
+    //   else {
+    //     return;
+    //   }
+
+    // }
+
+    // if (this.gridFound && !this.recognitionComplete) {
+    //   try {
+
+    //     this.doOCR(scope);
+    //     this.recognitionComplete = true;
+    //     this.cameraText = 'Recognised';
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+
+    // }
+
+
+  
   test() {
-    console.log('test');
+    // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+    //   this.txt =  canvas.toDataURL('image/png');
+      this.getElementData(0,1);
+      this.getElementData(0,5);
   }
   cellSelected(cell: CellOption) {
     if (this.isKillerInput) {
@@ -778,180 +845,221 @@ export class AppComponent {
   }
   setNewValue(e) {
 
-    // console.log(e);
+
     this.gridContents[e.key].values = e.value;
     const next = e.key + 1;
-    // setTimeout(() => {this.viewChildren.toArray()[next].inputElement.nativeElement.focus();},0);
+
   }
-  xxx() {
-    console.log('xxx');
-  }
-  // openCamera() {
-  //   this.startVideo();
-  //   // let video = document.getElementById('videoInput') as HTMLVideoElement;
-  //   // console.log(video.height);
+  // xxx() {
+  //   console.log('xxx');
   // }
+
   async startVideo(action: boolean) {
     this.streaming = !this.streaming;
     let streaming = action;
-    let video = document.getElementById('videoInput') as HTMLVideoElement;
+     this.video = document.getElementById('videoInput') as HTMLVideoElement;
     var ref = this;
-    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    this.videoRunning = true;
+    const videoConstraints = {
+      facingMode: 'environment',
+      width: 320
+    };
+    navigator.mediaDevices.enumerateDevices().then(
+      devices => devices.forEach(d => console.log(d.label))
+    );
+    navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false })
       .then(async function (stream) {
         ref.localStream = stream;
-        video.srcObject = stream;
+        ref.video.srcObject = stream;
         // video.onloadedmetadata = function (e) { video.play() }
-        await video.play();
-        console.log(video.offsetWidth);
-        console.log(video.offsetHeight);
-        video.height = video.videoHeight;
-        video.width = video.videoWidth;
-        let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-        let dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+        await ref.video.play();
+        console.log(ref.video.offsetWidth);
+        console.log(ref.video.offsetHeight);
+        ref.video.height = ref.video.videoHeight;
+        ref.video.width = ref.video.videoWidth;
+        let src = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
+        let rect = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
 
-        let cap = new cv.VideoCapture(video);
+        let cap = new cv.VideoCapture(ref.video);
+        const rectSize = 400;
+
+        cv.rectangle(rect, new cv.Point(50, 50), new cv.Point(ref.video.width - 50, ref.video.height - 50), [255, 0, 0, 255], 1);
+
+        cv.imshow('canvasVideo', rect);
         const FPS = 30;
-        
+
         function processVideo() {
           try {
-            if (!streaming) {
-              // clean and stop.
-              // video.pause();
-              // video.srcObject = null;
-              src.delete();
-              dst.delete();
-              stream.getTracks().forEach(track => track.stop());
-              return;
-            }
+
             let begin = Date.now();
             // start processing.
             cap.read(src);
-            // cv.rectangle(video, new cv.Point(50, 20), new cv.Point(270, 220), [255, 0, 0, 255], 2);
-            // cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-            cv.rectangle(src, new cv.Point(50,50), new cv.Point(video.width-50, video.height-50), [255, 0, 0, 255], 1);
-            cv.imshow('canvasOutput', src);
 
-            //  cv.imshow(this.overlayCan.nativeElement.id, ovl);
+            cv.imshow('canvasInput', src);
+            // cv.rectangle(rect, new cv.Point(50, 50), new cv.Point(video.width - 50, video.height - 50), [255, 0, 0, 255], 1);
+            // if (ref.cameraText !== '') {
+            // cv.putText(rect, ref.cameraText, new cv.Point(250, 250), cv.FONT_HERSHEY_SIMPLEX, 1, [255, 0, 0, 255], 2, cv.LINE_AA);
+            // }
+
+
+
             // schedule the next one.
-            let delay = 1000 / FPS - (Date.now() - begin);
-            // console.log(delay);
-            setTimeout(processVideo, delay);
+            let gridfound = ref.findContours();
+            ref.txt = 'Grid found: ' + gridfound;
+            if(gridfound){
+              ref.doOCR('grid');
+              return;
+            } else {
+              setTimeout(processVideo, 10);
+            }
+            // let delay = 1000 / FPS - (Date.now() - begin);
+
+            
           } catch (err) {
             console.log(err);
           }
         };
         setTimeout(processVideo, 0);
 
-        // 
 
-        // this.video = video;
-        
       })
-    
 
-      
+
+
       .catch(function (err) {
         console.log("An error occurred! " + err);
       });
 
 
-    // let ovl = new cv.Mat.zeros(250, 320, cv.CV_8UC4);
-    // let ovl = cv.imread(this.canvasInput.nativeElement.id);
-
-    // cv.rectangle(ovl , new cv.Point(50, 20), new cv.Point(270, 220), [255, 0, 0, 255], 2);
-    //  cv.imshow(this.overlayCan.nativeElement.id, ovl);
-
-
-    // const FPS = 30;
-
-    //   setTimeout(grabFrame, 100);
-    //   while(streaming){
-    //     setTimeout(grabFrame, 100);
-    //   }
-
-
-    //  function grabFrame(){
-    //   cap.read(src);
-    //   cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-    //   cv.imshow('canvasOutput', dst);
-    //  }
-    // this.getFrame(cap, src, dst); 
-
-
-    // cap.read(src);
-    //     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-    //     cv.imshow('canvasOutput', dst);
-    // schedule the first one.
-
-    // this.grabVideo(video,src, dst, cap); 
-    // this.grabVideo(video,src, dst, cap);
-
-    //     let video = document.getElementById("video") as HTMLVideoElement; // video is the id of video tag
-    // navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-    //     .then(function(stream) {
-    //         video.srcObject = stream;
-    //         video.play();
-    //     })
-    //     .catch(function(err) {
-    //         console.log("An error occurred! " + err);
-    //     });
   }
-  stopVideo(){
+  stopVideo() {
+    this.videoRunning = false;
     this.localStream.getTracks().forEach(track => track.stop());
   }
-  getFrame(cap: any, src: any, dst: any) {
-    setTimeout(() => {
-      // cap.read(src);
-      cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-      cv.imshow('canvasOutput', dst);
-    }, 100);
-  }
 
-  grabVideo(video: HTMLVideoElement, src: any, dst: any, cap: any) {
-    try {
-      // if (!streaming) {
-      //     // clean and stop.
-      //     video.pause();
-      //     // video.srcObject = null;
-      //     src.delete();
-      //     dst.delete();
-      //     return;
-      // }
-      let begin = Date.now();
-      // start processing.
-      while (true) {
-        cap.read(src);
-        cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-        this.showEl('grid');
-        console.log(Date.now());
-      }
-
-      // cv.imshow('canvasOutput', dst);
-
-      this.showEl('grid');
-      // schedule the next one.
-      let delay = 1000 / 30 - (Date.now() - begin);
-      // function
-      // setTimeout(function(){this.grabVideo(video,src, dst, cap)}, delay);
-    } catch (err) {
-      console.log(err);
-    }
-  }
   grabFrame() {
-    let src = cv.imread(this.canvasOutput.nativeElement.id);
-    cv.imshow(this.elOutput.nativeElement.id, src);
-    // let video = document.getElementById('videoInput') as HTMLVideoElement;
-    // let cap = new cv.VideoCapture(video);
-    // let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-    // cap.read(src);
-    // cv.imshow('canvasOutput', src);
-    src.delete();
+    let start = Date.now();
+
+    let ref = this;
+    let n = 0;
+    this.gridFound = false;
+    this.recognitionComplete = false;
+    let begin = Date.now();
+    this.attemptNumber = 0;
+    this.cameraText = 'starting...';
+
+    for(let i=0; i< 500;i++){
+      if(this.recognitionComplete){break;}
+      setTimeout(compute, 50);
+    }
+
+
+    function compute() {
+      let analyzeFrame = new Promise(function (gridFound, gridNotFound) {
+        let found = false;
+        let cap = new cv.VideoCapture(ref.video);
+        let src = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
+        cap.read(src);
+
+        cv.imshow('canvasVideoRaw', src);
+        src.delete();
+       
+          ref.attemptNumber++;
+          ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
+          found = ref.findContours();
+         
+
+
+        if (found) {
+          gridFound(true);
+        } else {
+          gridFound(false);
+        }
+      });
+
+      analyzeFrame.then(
+
+        (b) => {
+          if (b) {
+            ref.doOCR('grid');
+            ref.recognitionComplete = true;
+          } else {
+            console.log('analyzeFrame reurned false');
+          }
+        }
+      )
+    }
+
+
+
+    // for (let i = 0; i < 10; i++) {
+    //   findGrid().then(
+    //     () => { ref.doOCR('grid'); }
+    //   );
+    // setTimeout(findGrid, 10);
+    // this.cameraText = 'Analyzing....attempt ' + i;
+    // }
+    // while (!this.gridFound ) {
+
+    // }
+
+    // if (this.gridFound){
+    //   this.cameraText = 'Grid found ....recognising';
+    //   this.doOCR('grid');
+    // }
+
+    function findGrid(): boolean {
+
+
+
+      ref.attemptNumber++;
+      ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
+      return ref.findContours();
+
+    }
+
+    function analyze() {
+      try {
+
+        let src = cv.imread(ref.canvasVideoRaw.nativeElement.id);
+        // cv.imshow('canvasInput', src);
+        ref.showEl('grid');
+        console.log(Date.now() - begin);
+        let delay = Date.now() - begin + 100;
+        src.delete();
+        n = n + 1;
+        ref.cameraText = 'Attempt' + n;
+        if (!ref.gridFound) {
+          n = n + 1;
+          ref.showEl('grid');
+        } else {
+          ref.showEl('grid');
+        }
+
+        if (ref.recognitionComplete) {
+          ref.stopVideo();
+        }
+        // if (ref.videoRunning) {
+        //   setTimeout(analyze, delay);
+        // }
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // setTimeout(analyze, 0);
+
+
+
+
   }
 
   scan() {
     this.mainView = !this.mainView;
     this.cameraView = !this.cameraView;
   }
+
   // findCorners() {
   //   let src = cv.imread(this.canvasInput.nativeElement.id);
   //   let dst = cv.Mat.ones(src.rows, src.cols, cv.CV_8UC3);
