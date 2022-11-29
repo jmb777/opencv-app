@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, Input } from '@angular/core';
 import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
-import { tap, switchMap, filter } from 'rxjs/operators';
+import { tap, switchMap, filter, map } from 'rxjs/operators';
 import { forkJoin, Observable, empty, fromEvent, BehaviorSubject } from 'rxjs';
 import { Line } from './line';
 import { CloneVisitor } from '@angular/compiler/src/i18n/i18n_ast';
@@ -61,8 +61,10 @@ export class AppComponent {
   recognitionComplete = false;
   attemptNumber = 0;
   txt = '';
-  canvasInputWidth: any;
-
+  // canvasInputWidth: any;
+  videoElementHidden = true;
+  canvasInputHidden = true;
+ 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
     // Always subscribe to the NgOpenCVService isReady$ observer before using a CV related function to ensure that the OpenCV has been
@@ -103,7 +105,7 @@ export class AppComponent {
 
     }
 
-  
+
     // setTimeout(() => { this.viewChildren.toArray()[0].inputElement.nativeElement.focus(); }, 0);
   }
 
@@ -140,25 +142,74 @@ export class AppComponent {
       let cv1 = cv;
       load$
         .pipe(
+
+
           switchMap(() => {
             // let cvs = document.createElement('canvas');
             // cv1.imshow(cvs, `${reader.result}`);
             // console.log(cvs.width);
             // cvs.remove();
-            return this.ngOpenCVService.loadImageToHTMLCanvas(`${reader.result}`, this.canvasInput.nativeElement);
+            // console.log(`${reader.result}`);
+            let txt = `${reader.result}`;
+            let img = new Image();
+            img.src = txt;
+            console.log(img.width);
+            // return this.ngOpenCVService.loadImageToHTMLCanvas(txt, this.canvasInput.nativeElement);
+            return this.loadImageToHTMLCanvas(txt, this.canvasInput.nativeElement);
           })
+
         )
-        .subscribe(
-          () => { },
-          err => {
+        .subscribe({
+          next: () => { },
+          error: err => {
             console.log('Error loading image', err);
-          }
+          },
+          complete: () => { }
+        }
+
+
         );
+      
+      this.canvasInputHidden = false;
+      this.ocrResult = 'Loading file';
       reader.readAsDataURL(event.target.files[0]);
+
+
+
     }
   }
-  canvasInputChange(){
+
+  loadImageToHTMLCanvas(imageUrl: string, canvas: HTMLCanvasElement): Observable<any> {
+    return new Observable(observer => {
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        console.log(img.width);
+        // canvas.width = img.width;
+        // canvas.height = img.naturalHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let h = 400;
+        let w = img.width * h / img.height;
+      
+
+
+
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        observer.next();
+        this.showEl('grid');
+        observer.complete();
+      };
+      img.src = imageUrl;
+      this.ocrResult = 'Finding grid';
+    });
+  }
+
+  canvasInputChange() {
     console.log('Canvas event');
+
     // this.canvasInputWidth = this.canvasInput.nativeElement.width;
   }
 
@@ -579,7 +630,7 @@ export class AppComponent {
 
     }
 
-    this.ocrResult = "Recognising...";
+    // this.ocrResult = "Recognising...";
     const worker = createWorker({
       // logger: m => console.log(m),
     });
@@ -599,14 +650,18 @@ export class AppComponent {
       let chars: string[] = [];
       for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
-          let img =  this.getElementData(row, col);
+          let img = this.getElementData(row, col);
           if (img) {
-            // this.txt = 'befoe recognize';
-            let { data: { text, confidence, symbols } } = await worker.recognize(img);
-            this.txt = 'after recognise';
-            symbols.sort((s1, s2) => s2.confidence - s1.confidence);
-            text = symbols[0].text;
-            chars.push(text);
+            try {
+              let { data: { text, confidence, symbols } } = await worker.recognize(img);
+              this.txt = 'after recognise';
+              symbols.sort((s1, s2) => s2.confidence - s1.confidence);
+              text = symbols[0].text;
+              chars.push(text);
+            } catch (error) {
+              chars.push('');
+            }
+
             // this.txt = text;
 
           }
@@ -645,7 +700,7 @@ export class AppComponent {
     }
 
     this.showGrid = true;
-    this.ocrResult = '';
+    this.ocrResult = 'Analysis complete';
 
     await worker.terminate();
 
@@ -671,13 +726,14 @@ export class AppComponent {
   }
 
 
-   getElementData(row: number, col: number) {
+  getElementData(row: number, col: number) {
     let src = cv.imread('canvasOutput');
     let dst = new cv.Mat();
     let r = new Rectangle(this.grid[row][col], this.grid[Number(row) + 1][Number(col) + 1]);
     let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
     dst = src.roi(rect);
     if (this.imgInfo(dst)) {
+      // if (true) {  
       // cv.threshold(dst, dst, 128, 255, cv.THRESH_OTSU);
       let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
       cv.imshow(this.elOutput.nativeElement.id, dst);
@@ -694,9 +750,26 @@ export class AppComponent {
 
 
   }
+
+  backgroundColour(i, j) {
+    const iEven = ((Math.floor(i / 3) + 1) % 2 == 0) ? true : false;
+    const jEven = ((Math.floor(j / 3) + 1) % 2 == 0) ? true : false;
+    if (iEven == jEven) {
+      return 'red';
+    } else {
+      return 'blue';
+    }
+
+
+  }
   async showEl(scope) {
     try {
-      this.findContours();
+      if (!this.findContours()) {
+        this.ocrResult = 'Unable to detect grid';
+        return;
+      } else {
+        this.ocrResult = 'Grid found....    Analysing content';
+      }
     } catch (error) {
       this.ocrResult = 'Unable to detect grid';
       return;
@@ -714,38 +787,38 @@ export class AppComponent {
 
   }
 
-    // this.findContours();
-    // this.doOCR(scope);
-    // if (!this.gridFound) {
-    //   if (this.findContours()) {
-    //     this.gridFound = true;
-    //     return;
-    //   }
-    //   else {
-    //     return;
-    //   }
+  // this.findContours();
+  // this.doOCR(scope);
+  // if (!this.gridFound) {
+  //   if (this.findContours()) {
+  //     this.gridFound = true;
+  //     return;
+  //   }
+  //   else {
+  //     return;
+  //   }
 
-    // }
+  // }
 
-    // if (this.gridFound && !this.recognitionComplete) {
-    //   try {
+  // if (this.gridFound && !this.recognitionComplete) {
+  //   try {
 
-    //     this.doOCR(scope);
-    //     this.recognitionComplete = true;
-    //     this.cameraText = 'Recognised';
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
+  //     this.doOCR(scope);
+  //     this.recognitionComplete = true;
+  //     this.cameraText = 'Recognised';
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
 
-    // }
+  // }
 
 
-  
+
   test() {
     // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
     //   this.txt =  canvas.toDataURL('image/png');
-      this.getElementData(0,1);
-      this.getElementData(0,5);
+    this.getElementData(0, 1);
+    this.getElementData(0, 5);
   }
   cellSelected(cell: CellOption) {
     if (this.isKillerInput) {
@@ -855,9 +928,14 @@ export class AppComponent {
   // }
 
   async startVideo(action: boolean) {
+    this.ocrResult = 'Align grid with rectangle';
+    this.showGrid = false;
+    this.canvasInputHidden = true;
+    this.videoElementHidden = !action;
+    
     this.streaming = !this.streaming;
     let streaming = action;
-     this.video = document.getElementById('videoInput') as HTMLVideoElement;
+    this.video = document.getElementById('videoInput') as HTMLVideoElement;
     var ref = this;
     this.videoRunning = true;
     const videoConstraints = {
@@ -906,7 +984,11 @@ export class AppComponent {
             // schedule the next one.
             let gridfound = ref.findContours();
             ref.txt = 'Grid found: ' + gridfound;
-            if(gridfound){
+            if (gridfound) {
+              ref.ocrResult = 'Grid found... analyzing content';
+              ref.videoRunning = false;
+              ref.localStream.getTracks().forEach(track => track.stop());
+              ref.videoElementHidden = true;
               ref.doOCR('grid');
               return;
             } else {
@@ -914,7 +996,7 @@ export class AppComponent {
             }
             // let delay = 1000 / FPS - (Date.now() - begin);
 
-            
+
           } catch (err) {
             console.log(err);
           }
@@ -948,8 +1030,8 @@ export class AppComponent {
     this.attemptNumber = 0;
     this.cameraText = 'starting...';
 
-    for(let i=0; i< 500;i++){
-      if(this.recognitionComplete){break;}
+    for (let i = 0; i < 500; i++) {
+      if (this.recognitionComplete) { break; }
       setTimeout(compute, 50);
     }
 
@@ -963,11 +1045,11 @@ export class AppComponent {
 
         cv.imshow('canvasVideoRaw', src);
         src.delete();
-       
-          ref.attemptNumber++;
-          ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
-          found = ref.findContours();
-         
+
+        ref.attemptNumber++;
+        ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
+        found = ref.findContours();
+
 
 
         if (found) {

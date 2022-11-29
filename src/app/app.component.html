@@ -1,39 +1,36 @@
-<div >
-  <table cellpadding="0" cellspacing="0" width="0" border="0">
-    <tr>
-      <td>
-        <canvas  #canvasInput id="canvasInput"></canvas>
-      </td>
-      <td>
-        <canvas  #canvasOutput id="canvasOutput"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="caption">Select photo <input (change)="readDataUrl($event)" #fileInput type="file" id="fileInput"
-            name="file" accept="image/*" /></div>
-      </td>
-      <!-- <td>
-        <div class="caption">canvasOutput</div>
-      </td> -->
-    </tr>
-  </table>
+<div>
+  <button (click)="startVideo(true)">Scan puzzle</button>
+  <button onclick="document.getElementById('fileInput').click()">Select a photo</button>
+  <!-- <label class="btn" for="fileInput">Choose images to upload (PNG, JPG)</label> -->
+  <input style="visibility:hidden;" (change)="readDataUrl($event)" #fileInput type="file" id="fileInput"
+    name="fileInput" accept="image/*" />
+
+</div>
+<div>
+  {{ocrResult}}
+</div>
+<canvas [hidden]="canvasInputHidden" #canvasInput id="canvasInput"></canvas>
+<canvas hidden #canvasOutput id="canvasOutput"></canvas>
+<div>
+
+
+
   <!-- <input [(ngModel)]="selRow" >Row
   <input [(ngModel)]="selCol" >Col -->
-  <button (click)="showEl('grid')">Recognise grid</button>
-  <button (click)="showEl('cell')">test</button>
-  <button (click)="scan()">Scan puzzle</button>
+  <!-- <button (click)="showEl('grid')">Recognise grid</button>
+  <button (click)="showEl('cell')">test</button> -->
+  <!-- <button (click)="scan()">Scan puzzle</button> -->
 
   <div>
-    <canvas hidden  #elOutput id="elOutput"></canvas>
-    
+    <canvas hidden #elOutput id="elOutput"></canvas>
+
   </div>
-  {{txt}}
+
   <!-- <div>
     <canvas  #canvasVideo id="canvasVideo"></canvas>
   </div> -->
   <div>
-    <canvas  #canvasVideoRaw id="canvasVideoRaw"></canvas>
+    <canvas #canvasVideoRaw id="canvasVideoRaw"></canvas>
   </div>
 
   <!-- <div *ngIf="showGrid">
@@ -55,7 +52,7 @@
     </div>
 
   </div> -->
-  {{ocrResult}}
+
 
 </div>
 
@@ -68,29 +65,29 @@
 
 
   <br>
-  <button (click)="startVideo(true)">Start video</button>
-  <button (click)="grabFrame()">Grab frame</button>
-  <button (click)="stopVideo()">Stop video</button>
+
+  <!-- <button (click)="grabFrame()">Grab frame</button>
+  <button (click)="stopVideo()">Stop video</button> -->
   <div class="videoInput">
-    <video   #videoInput id="videoInput" playsinline=true></video>
+    <video [hidden]="videoElementHidden" #videoInput id="videoInput" playsinline=true></video>
     <!-- <div >Some text</div> -->
     <div class="overlay">
-      <canvas  #canvasVideo id="canvasVideo"></canvas>
+      <canvas [hidden]="videoElementHidden" #canvasVideo id="canvasVideo"></canvas>
     </div>
-    <div>{{cameraText}}</div>
+    
 
   </div>
-    
-    
-      <!-- <canvas class="overlay" #overlayCan id="overlayCan" height="240px" width="320px"></canvas> -->
-    
-  
+
+
+  <!-- <canvas class="overlay" #overlayCan id="overlayCan" height="240px" width="320px"></canvas> -->
+
+
 
 
 
 </div>
 
-<h1>Angular Router App</h1>
+
 <div *ngIf="showGrid">
   <div fxLayout="column">
 
@@ -101,7 +98,8 @@
           <!-- <app-cell (cellSelected)="cellSelected($event)" (newValue)="setNewValue($event)"
             [cellOption]="gridContents[i + row * 9 ]" [killerInput]="isKillerInput"></app-cell> -->
 
-            <div class="gridBox">{{gridContents[i + row * 9].uniqueValue}}</div>
+          <div class="gridBox" [style.background-color]="backgroundColour(i , row)">{{gridContents[i + row *
+            9].uniqueValue}}</div>
         </div>
 
 
