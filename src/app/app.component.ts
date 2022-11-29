@@ -3,15 +3,15 @@ import { NgOpenCVService, OpenCVLoadResult } from 'ng-open-cv';
 import { tap, switchMap, filter, map } from 'rxjs/operators';
 import { forkJoin, Observable, empty, fromEvent, BehaviorSubject } from 'rxjs';
 import { Line } from './line';
-import { CloneVisitor } from '@angular/compiler/src/i18n/i18n_ast';
+// import { CloneVisitor } from '@angular/compiler/src/i18n/i18n_ast';
 import { Coord } from './coord.class';
 import { createWorker } from 'tesseract.js';
 import { Rectangle } from './rectangle';
 import * as Tesseract from 'tesseract.js';
-import { FormsModule } from '@angular/forms';
-import { CellComponent } from './cell/cell.component';
+// import { FormsModule } from '@angular/forms';
+// import { CellComponent } from './cell/cell.component';
 import { CellOption } from './classes/cellOption';
-import { Killer } from './classes/killer';
+// import { Killer } from './classes/killer';
 
 @Component({
   selector: 'app-root',
@@ -42,46 +42,46 @@ export class AppComponent {
   gridContents: CellOption[] = [];
   rows = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   killerPuzzle: CellOption[][] = [];
-  isKillerInput = false;
-  killerCells: CellOption[] = [];
-  colourIndex = 0;
-  killer: Killer = new Killer();
-  puzzleType = 'killer';
+  // isKillerInput = false;
+  // killerCells: CellOption[] = [];
+  // colourIndex = 0;
+  // killer: Killer = new Killer();
+  // puzzleType = 'killer';
   showGrid = false;
   streaming = false;
-  mainView = true;
+  // mainView = true;
   cameraView = false;
   @ViewChild('canvasVideo') canvasVideo: ElementRef;
   @ViewChild('canvasVideoRaw') canvasVideoRaw: ElementRef;
   video: HTMLVideoElement = document.getElementById('videoInput') as HTMLVideoElement;
   localStream: MediaStream;
-  cameraText = '';
+  // cameraText = '';
   videoRunning = false;
   gridFound = false;
-  recognitionComplete = false;
-  attemptNumber = 0;
+  // recognitionComplete = false;
+  // attemptNumber = 0;
   txt = '';
   // canvasInputWidth: any;
   videoElementHidden = true;
   canvasInputHidden = true;
- 
+
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
     // Always subscribe to the NgOpenCVService isReady$ observer before using a CV related function to ensure that the OpenCV has been
     // successfully loaded
-    this.ngOpenCVService.isReady$
-      .pipe(
-        // The OpenCV library has been successfully loaded if result.ready === true
-        filter((result: OpenCVLoadResult) => result.ready),
-        switchMap(() => {
-          // Load the face and eye classifiers files
-          return this.loadClassifiers();
-        })
-      )
-      .subscribe(() => {
-        // The classifiers have been succesfully loaded
-        this.classifiersLoaded.next(true);
-      });
+    // this.ngOpenCVService.isReady$
+    //   .pipe(
+    //     // The OpenCV library has been successfully loaded if result.ready === true
+    //     filter((result: OpenCVLoadResult) => result.ready),
+    //     switchMap(() => {
+    //       // Load the face and eye classifiers files
+    //       return this.loadClassifiers();
+    //     })
+    //   )
+    //   .subscribe(() => {
+    //     // The classifiers have been succesfully loaded
+    //     this.classifiersLoaded.next(true);
+    //   });
 
     //   this.gridContents = [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 0 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 4 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 5 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 6 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7 }, { values: [8], uniqueValue: null, cellNumber: 8 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 10 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11 }, { values: [4], uniqueValue: null, cellNumber: 12 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 15 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 16 }, { values: [6], uniqueValue: null, cellNumber: 17 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 18 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 19 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 20 }, { values: [6], uniqueValue: null, cellNumber: 21 }, { values: [9], uniqueValue: null, cellNumber: 22 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23 }, { values: [5], uniqueValue: null, cellNumber: 24 }, { values: [1], uniqueValue: null, cellNumber: 25 }, { values: [7], uniqueValue: null, cellNumber: 26 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 27 }, { values: [5], uniqueValue: null, cellNumber: 28 }, { values: [7], uniqueValue: null, cellNumber: 29 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 30 }, { values: [4], uniqueValue: null, cellNumber: 31 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 33 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 34 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 37 }, { values: [9], uniqueValue: null, cellNumber: 38 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 39 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 40 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 41 }, { values: [3], uniqueValue: null, cellNumber: 42 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 43 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 46 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48 }, { values: [1], uniqueValue: null, cellNumber: 49 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 50 }, { values: [8], uniqueValue: null, cellNumber: 51 }, { values: [2], uniqueValue: null, cellNumber: 52 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53 }, { values: [4], uniqueValue: null, cellNumber: 54 }, { values: [8], uniqueValue: null, cellNumber: 55 }, { values: [3], uniqueValue: null, cellNumber: 56 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57 }, { values: [6], uniqueValue: null, cellNumber: 58 }, { values: [2], uniqueValue: null, cellNumber: 59 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 60 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 61 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 62 }, { values: [5], uniqueValue: null, cellNumber: 63 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 64 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67 }, { values: [1], uniqueValue: null, cellNumber: 68 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 70 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71 }, { values: [6], uniqueValue: null, cellNumber: 72 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 76 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 80 }];
     // this.gridContents = [{ values: [5], uniqueValue: null, cellNumber: 0 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3 }, { values: [2], uniqueValue: null, cellNumber: 4 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 5 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 6 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7 }, { values: [6], uniqueValue: null, cellNumber: 8 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9 }, { values: [8], uniqueValue: null, cellNumber: 10 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11 }, { values: [9], uniqueValue: null, cellNumber: 12 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 15 }, { values: [5], uniqueValue: null, cellNumber: 16 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 17 }, { values: [1], uniqueValue: null, cellNumber: 18 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 19 }, { values: [2], uniqueValue: null, cellNumber: 20 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 21 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 22 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23 }, { values: [7], uniqueValue: null, cellNumber: 24 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 25 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 26 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 27 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 28 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 29 }, { values: [8], uniqueValue: null, cellNumber: 30 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 31 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 33 }, { values: [3], uniqueValue: null, cellNumber: 34 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36 }, { values: [4], uniqueValue: null, cellNumber: 37 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 38 }, { values: [5], uniqueValue: null, cellNumber: 39 }, { values: [3], uniqueValue: null, cellNumber: 40 }, { values: [1], uniqueValue: null, cellNumber: 41 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 42 }, { values: [6], uniqueValue: null, cellNumber: 43 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45 }, { values: [1], uniqueValue: null, cellNumber: 46 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 49 }, { values: [2], uniqueValue: null, cellNumber: 50 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 51 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 52 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 54 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 55 }, { values: [9], uniqueValue: null, cellNumber: 56 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 58 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 59 }, { values: [6], uniqueValue: null, cellNumber: 60 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 61 }, { values: [8], uniqueValue: null, cellNumber: 62 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 63 }, { values: [7], uniqueValue: null, cellNumber: 64 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67 }, { values: [4], uniqueValue: null, cellNumber: 68 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69 }, { values: [1], uniqueValue: null, cellNumber: 70 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71 }, { values: [8], uniqueValue: null, cellNumber: 72 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75 }, { values: [5], uniqueValue: null, cellNumber: 76 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79 }, { values: [3], uniqueValue: null, cellNumber: 80 }];
@@ -97,8 +97,8 @@ export class AppComponent {
     // this.killer.setColours(this.killerPuzzle, this.gridContents);
 
     this.gridContents = [];
-    this.isKillerInput = false;
-    this.puzzleType = 'sudoku';
+    // this.isKillerInput = false;
+    // this.puzzleType = 'sudoku';
     // this.gridContents[0] = new CellOption([4], 0);
     for (let index = 0; index < 81; index++) {
       this.gridContents.push(new CellOption([1, 2, 3, 4, 5, 6, 7, 8, 9], index));
@@ -120,19 +120,19 @@ export class AppComponent {
       )
       .subscribe(() => { });
   }
-  loadClassifiers(): Observable<any> {
-    return forkJoin(
-      // this.ngOpenCVService.createFileFromUrl(
-      //   'haarcascade_frontalface_default.xml',
-      //   `assets/opencv/data/haarcascades/haarcascade_frontalface_default.xml`
-      // ),
-      // this.ngOpenCVService.createFileFromUrl(
-      //   'haarcascade_eye.xml',
-      //   `assets/opencv/data/haarcascades/haarcascade_eye.xml`
-      // )
-    );
+  // loadClassifiers(): Observable<any> {
+  //   return forkJoin(
+  //     // this.ngOpenCVService.createFileFromUrl(
+  //     //   'haarcascade_frontalface_default.xml',
+  //     //   `assets/opencv/data/haarcascades/haarcascade_frontalface_default.xml`
+  //     // ),
+  //     // this.ngOpenCVService.createFileFromUrl(
+  //     //   'haarcascade_eye.xml',
+  //     //   `assets/opencv/data/haarcascades/haarcascade_eye.xml`
+  //     // )
+  //   );
 
-  }
+  // }
 
   readDataUrl(event: any) {
     if (event.target.files.length) {
@@ -169,7 +169,7 @@ export class AppComponent {
 
 
         );
-      
+
       this.canvasInputHidden = false;
       this.ocrResult = 'Loading file';
       reader.readAsDataURL(event.target.files[0]);
@@ -191,7 +191,7 @@ export class AppComponent {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let h = 400;
         let w = img.width * h / img.height;
-      
+
 
 
 
@@ -755,9 +755,9 @@ export class AppComponent {
     const iEven = ((Math.floor(i / 3) + 1) % 2 == 0) ? true : false;
     const jEven = ((Math.floor(j / 3) + 1) % 2 == 0) ? true : false;
     if (iEven == jEven) {
-      return 'red';
+      return 'silver';
     } else {
-      return 'blue';
+      return 'white';
     }
 
 
@@ -814,115 +814,115 @@ export class AppComponent {
 
 
 
-  test() {
-    // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-    //   this.txt =  canvas.toDataURL('image/png');
-    this.getElementData(0, 1);
-    this.getElementData(0, 5);
-  }
-  cellSelected(cell: CellOption) {
-    if (this.isKillerInput) {
-      let alreadySelected = false;
-      this.killerPuzzle.forEach(group => {
-        if (group.includes(cell)) { alreadySelected = true; }
-      });
-      if (alreadySelected) { return; }
-      if (cell.isSelected) {
-        cell.killerBorderBottom = false;
-        cell.killerBorderLeft = false;
-        cell.killerBorderRight = false;
-        cell.killerBorderTop = false;
-        this.killerCells.splice(this.killerCells.indexOf(cell), 1);
-      } else {
-        this.killerCells.push(cell);
-      }
+  // test() {
+  //   // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
+  //   //   this.txt =  canvas.toDataURL('image/png');
+  //   this.getElementData(0, 1);
+  //   this.getElementData(0, 5);
+  // }
+  // cellSelected(cell: CellOption) {
+  //   if (this.isKillerInput) {
+  //     let alreadySelected = false;
+  //     this.killerPuzzle.forEach(group => {
+  //       if (group.includes(cell)) { alreadySelected = true; }
+  //     });
+  //     if (alreadySelected) { return; }
+  //     if (cell.isSelected) {
+  //       cell.killerBorderBottom = false;
+  //       cell.killerBorderLeft = false;
+  //       cell.killerBorderRight = false;
+  //       cell.killerBorderTop = false;
+  //       this.killerCells.splice(this.killerCells.indexOf(cell), 1);
+  //     } else {
+  //       this.killerCells.push(cell);
+  //     }
 
-      if (this.areContiguousCells(this.killerCells)) {
-        cell.isSelected = (cell.isSelected) ? false : true;
+  //     if (this.areContiguousCells(this.killerCells)) {
+  //       cell.isSelected = (cell.isSelected) ? false : true;
 
-      } else {
-        if (cell.isSelected) {
-          this.killerCells.push(cell);
-        } else {
+  //     } else {
+  //       if (cell.isSelected) {
+  //         this.killerCells.push(cell);
+  //       } else {
 
-          this.killerCells.splice(this.killerCells.indexOf(cell), 1);
-        }
-      }
+  //         this.killerCells.splice(this.killerCells.indexOf(cell), 1);
+  //       }
+  //     }
 
-      this.setKillerBorders();
+  //     this.setKillerBorders();
 
-    }
+  //   }
 
-  }
-  areContiguousCells(cells: CellOption[]): boolean {
-    if (cells.length === 1) {
-      return true;
-    }
+  // }
+  // areContiguousCells(cells: CellOption[]): boolean {
+  //   if (cells.length === 1) {
+  //     return true;
+  //   }
 
-    for (const c of cells) {
-      let result = false;
-      const row = Math.floor(c.cellNumber / 9);
-      const col = c.cellNumber % 9;
-      cells.forEach(p => {
+  //   for (const c of cells) {
+  //     let result = false;
+  //     const row = Math.floor(c.cellNumber / 9);
+  //     const col = c.cellNumber % 9;
+  //     cells.forEach(p => {
 
-        const row1 = Math.floor(p.cellNumber / 9);
-        const col1 = p.cellNumber % 9;
-        if (row === row1 && Math.abs(col - col1) === 1) {
-          result = true;
-        }
-        if (col === col1 && Math.abs(row - row1) === 1) {
-          result = true;
-        }
+  //       const row1 = Math.floor(p.cellNumber / 9);
+  //       const col1 = p.cellNumber % 9;
+  //       if (row === row1 && Math.abs(col - col1) === 1) {
+  //         result = true;
+  //       }
+  //       if (col === col1 && Math.abs(row - row1) === 1) {
+  //         result = true;
+  //       }
 
-      });
+  //     });
 
-      if (!result) { return false; }
-    }
-    return true;
+  //     if (!result) { return false; }
+  //   }
+  //   return true;
 
-  }
+  // }
 
-  setKillerBorders() {
-    this.killerCells.forEach(c => {
-      c.killerBorderBottom = false;
-      c.killerBorderLeft = false;
-      c.killerBorderRight = false;
-      c.killerBorderTop = false;
-      // c.killerBackground = this.colours[this.colourIndex];
-    });
-    this.colourIndex++;
-    this.colourIndex = this.colourIndex % 14;
-    this.killerCells.sort((a, b) => a.cellNumber > b.cellNumber ? 1 : -1);
-    for (const c of this.killerCells) {
-      const _row = Math.floor(c.cellNumber / 9);
-      const _col = c.cellNumber % 9;
-      let _top = true;
-      let _bottom = true;
-      let _right = true;
-      let _left = true;
+  // setKillerBorders() {
+  //   this.killerCells.forEach(c => {
+  //     c.killerBorderBottom = false;
+  //     c.killerBorderLeft = false;
+  //     c.killerBorderRight = false;
+  //     c.killerBorderTop = false;
+  //     // c.killerBackground = this.colours[this.colourIndex];
+  //   });
+  //   this.colourIndex++;
+  //   this.colourIndex = this.colourIndex % 14;
+  //   this.killerCells.sort((a, b) => a.cellNumber > b.cellNumber ? 1 : -1);
+  //   for (const c of this.killerCells) {
+  //     const _row = Math.floor(c.cellNumber / 9);
+  //     const _col = c.cellNumber % 9;
+  //     let _top = true;
+  //     let _bottom = true;
+  //     let _right = true;
+  //     let _left = true;
 
-      this.killerCells.forEach(cell => {
-        if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 + 1 === _col) { _left = false; }
-        if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 - 1 === _col) { _right = false; }
-        if (Math.floor(cell.cellNumber / 9) + 1 === _row && cell.cellNumber % 9 === _col) { _top = false; }
-        if (Math.floor(cell.cellNumber / 9) - 1 === _row && cell.cellNumber % 9 === _col) { _bottom = false; }
-      });
+  //     this.killerCells.forEach(cell => {
+  //       if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 + 1 === _col) { _left = false; }
+  //       if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 - 1 === _col) { _right = false; }
+  //       if (Math.floor(cell.cellNumber / 9) + 1 === _row && cell.cellNumber % 9 === _col) { _top = false; }
+  //       if (Math.floor(cell.cellNumber / 9) - 1 === _row && cell.cellNumber % 9 === _col) { _bottom = false; }
+  //     });
 
-      c.killerBorderTop = _top;
-      c.killerBorderBottom = _bottom;
-      c.killerBorderLeft = _left;
-      c.killerBorderRight = _right;
-    }
-
-
-  }
-  setNewValue(e) {
+  //     c.killerBorderTop = _top;
+  //     c.killerBorderBottom = _bottom;
+  //     c.killerBorderLeft = _left;
+  //     c.killerBorderRight = _right;
+  //   }
 
 
-    this.gridContents[e.key].values = e.value;
-    const next = e.key + 1;
+  // }
+  // setNewValue(e) {
 
-  }
+
+  //   this.gridContents[e.key].values = e.value;
+  //   const next = e.key + 1;
+
+  // }
   // xxx() {
   //   console.log('xxx');
   // }
@@ -932,7 +932,7 @@ export class AppComponent {
     this.showGrid = false;
     this.canvasInputHidden = true;
     this.videoElementHidden = !action;
-    
+
     this.streaming = !this.streaming;
     let streaming = action;
     this.video = document.getElementById('videoInput') as HTMLVideoElement;
@@ -962,7 +962,9 @@ export class AppComponent {
         const rectSize = 400;
 
         cv.rectangle(rect, new cv.Point(50, 50), new cv.Point(ref.video.width - 50, ref.video.height - 50), [255, 0, 0, 255], 1);
-
+        let canvas = document.getElementById('canvasInput') as HTMLCanvasElement;
+        canvas.width = ref.video.width;
+        canvas.height = ref.video.height;
         cv.imshow('canvasVideo', rect);
         const FPS = 30;
 
@@ -972,6 +974,7 @@ export class AppComponent {
             let begin = Date.now();
             // start processing.
             cap.read(src);
+
 
             cv.imshow('canvasInput', src);
             // cv.rectangle(rect, new cv.Point(50, 50), new cv.Point(video.width - 50, video.height - 50), [255, 0, 0, 255], 1);
@@ -1014,63 +1017,63 @@ export class AppComponent {
 
 
   }
-  stopVideo() {
-    this.videoRunning = false;
-    this.localStream.getTracks().forEach(track => track.stop());
-  }
+  // stopVideo() {
+  //   this.videoRunning = false;
+  //   this.localStream.getTracks().forEach(track => track.stop());
+  // }
 
-  grabFrame() {
-    let start = Date.now();
+  // grabFrame() {
+  //   let start = Date.now();
 
-    let ref = this;
-    let n = 0;
-    this.gridFound = false;
-    this.recognitionComplete = false;
-    let begin = Date.now();
-    this.attemptNumber = 0;
-    this.cameraText = 'starting...';
+  //   let ref = this;
+  //   let n = 0;
+  //   this.gridFound = false;
+  //   this.recognitionComplete = false;
+  //   let begin = Date.now();
+  //   this.attemptNumber = 0;
+  //   this.cameraText = 'starting...';
 
-    for (let i = 0; i < 500; i++) {
-      if (this.recognitionComplete) { break; }
-      setTimeout(compute, 50);
-    }
-
-
-    function compute() {
-      let analyzeFrame = new Promise(function (gridFound, gridNotFound) {
-        let found = false;
-        let cap = new cv.VideoCapture(ref.video);
-        let src = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
-        cap.read(src);
-
-        cv.imshow('canvasVideoRaw', src);
-        src.delete();
-
-        ref.attemptNumber++;
-        ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
-        found = ref.findContours();
+  //   for (let i = 0; i < 500; i++) {
+  //     if (this.recognitionComplete) { break; }
+  //     setTimeout(compute, 50);
+  //   }
 
 
+  //   function compute() {
+  //     let analyzeFrame = new Promise(function (gridFound, gridNotFound) {
+  //       let found = false;
+  //       let cap = new cv.VideoCapture(ref.video);
+  //       let src = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
+  //       cap.read(src);
 
-        if (found) {
-          gridFound(true);
-        } else {
-          gridFound(false);
-        }
-      });
+  //       cv.imshow('canvasVideoRaw', src);
+  //       src.delete();
 
-      analyzeFrame.then(
+  //       ref.attemptNumber++;
+  //       ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
+  //       found = ref.findContours();
 
-        (b) => {
-          if (b) {
-            ref.doOCR('grid');
-            ref.recognitionComplete = true;
-          } else {
-            console.log('analyzeFrame reurned false');
-          }
-        }
-      )
-    }
+
+
+  //       if (found) {
+  //         gridFound(true);
+  //       } else {
+  //         gridFound(false);
+  //       }
+  //     });
+
+  //     analyzeFrame.then(
+
+  //       (b) => {
+  //         if (b) {
+  //           ref.doOCR('grid');
+  //           ref.recognitionComplete = true;
+  //         } else {
+  //           console.log('analyzeFrame reurned false');
+  //         }
+  //       }
+  //     )
+  //   }
 
 
 
@@ -1090,57 +1093,57 @@ export class AppComponent {
     //   this.doOCR('grid');
     // }
 
-    function findGrid(): boolean {
+    // function findGrid(): boolean {
 
 
 
-      ref.attemptNumber++;
-      ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
-      return ref.findContours();
+    //   ref.attemptNumber++;
+    //   ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
+    //   return ref.findContours();
 
-    }
+    // }
 
-    function analyze() {
-      try {
+    // function analyze() {
+    //   try {
 
-        let src = cv.imread(ref.canvasVideoRaw.nativeElement.id);
-        // cv.imshow('canvasInput', src);
-        ref.showEl('grid');
-        console.log(Date.now() - begin);
-        let delay = Date.now() - begin + 100;
-        src.delete();
-        n = n + 1;
-        ref.cameraText = 'Attempt' + n;
-        if (!ref.gridFound) {
-          n = n + 1;
-          ref.showEl('grid');
-        } else {
-          ref.showEl('grid');
-        }
+    //     let src = cv.imread(ref.canvasVideoRaw.nativeElement.id);
+    //     // cv.imshow('canvasInput', src);
+    //     ref.showEl('grid');
+    //     console.log(Date.now() - begin);
+    //     let delay = Date.now() - begin + 100;
+    //     src.delete();
+    //     n = n + 1;
+    //     ref.cameraText = 'Attempt' + n;
+    //     if (!ref.gridFound) {
+    //       n = n + 1;
+    //       ref.showEl('grid');
+    //     } else {
+    //       ref.showEl('grid');
+    //     }
 
-        if (ref.recognitionComplete) {
-          ref.stopVideo();
-        }
-        // if (ref.videoRunning) {
-        //   setTimeout(analyze, delay);
-        // }
+    //     if (ref.recognitionComplete) {
+    //       ref.stopVideo();
+    //     }
+    //     // if (ref.videoRunning) {
+    //     //   setTimeout(analyze, delay);
+    //     // }
 
-      } catch (error) {
-        console.log(error);
-      }
-    }
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }
 
     // setTimeout(analyze, 0);
 
 
 
 
-  }
+  // }
 
-  scan() {
-    this.mainView = !this.mainView;
-    this.cameraView = !this.cameraView;
-  }
+  // scan() {
+  //   this.mainView = !this.mainView;
+  //   this.cameraView = !this.cameraView;
+  // }
 
   // findCorners() {
   //   let src = cv.imread(this.canvasInput.nativeElement.id);
