@@ -11,6 +11,7 @@ import * as Tesseract from 'tesseract.js';
 // import { FormsModule } from '@angular/forms';
 // import { CellComponent } from './cell/cell.component';
 import { CellOption } from './classes/cellOption';
+import { GridAlignColumnsDirective } from '@angular/flex-layout';
 // import { Killer } from './classes/killer';
 
 @Component({
@@ -265,7 +266,7 @@ export class AppComponent {
     //   console.log(error);
     // }
 
-    src.delete(); dst.delete(); contours.delete();
+    // src.delete(); dst.delete(); contours.delete();
     if (this.grid.length == 0) {
       return false;
     }
@@ -966,7 +967,7 @@ export class AppComponent {
       this.videoRunning = false;
       this.localStream.getTracks().forEach(track => track.stop());
       this.videoElementHidden = true;
-      this.video.remove();
+      // this.video.remove();
       // this.localStream = null;
       document.getElementById('videoBtn').innerText = 'Scan puzzle';
 
@@ -992,13 +993,13 @@ export class AppComponent {
     this.streaming = !this.streaming;
     // let streaming = action;
     // this.video = document.getElementById('videoInput') as HTMLVideoElement;
-    let video = document.createElement('video');
-    // let video = document.getElementById('videoInput') as HTMLVideoElement;
-    this.video  = video;
-    this.videoId = 'videoInput';
-    // video.id = Date().toString();
-    const div = document.getElementById('videoDiv');
-    div.appendChild(video);
+    // let video = document.createElement('video');
+    let video = document.getElementById('videoInput') as HTMLVideoElement;
+    // this.video  = video;
+    // this.videoId = 'videoInput';
+    // // video.id = Date().toString();
+    // const div = document.getElementById('videoDiv');
+    // div.appendChild(video);
     var ref = this;
     this.videoRunning = true;
     const videoConstraints = {
@@ -1048,39 +1049,43 @@ export class AppComponent {
           if(!ref.videoRunning){return;}
           // start processing.
           cap.read(src);
-
+          let begin = Date();
+          // while(Date() < begin + 500){}
 
           cv.imshow('canvasInput', src);
+          let gridFound =  ref.findContours();
+          console.log(`Gridfound = ${gridFound}`);
+          setTimeout(processVideo, 10);
           // if(it > 100){
           //   console.log('stop processing');
           //   isProcessing = false;
           // }
-          if(isProcessing){
-            it++;
-            setTimeout(processVideo, 10);
-          } else{
-            const findContours$ = new  Observable((subsriber => {
-              isProcessing = true
-              const v = ref.findContours();
-              setTimeout(() => {
-                  subsriber.next(v);
-              subsriber.complete();
-              }, 500);
+          // if(isProcessing){
+          //   it++;
+          //   setTimeout(processVideo, 10);
+          // } else{
+          //   const findContours$ = new  Observable((subsriber => {
+          //     isProcessing = true
+          //     const v = ref.findContours();
+          //     setTimeout(() => {
+          //         subsriber.next(v);
+          //     subsriber.complete();
+          //     }, 500);
             
-            }));
-            console.log('start processing');
-            findContours$.subscribe({
-              next(v) {
-                console.log(`findcontours returned ${v}`);
-                isProcessing = false;
-                setTimeout(processVideo, 10);
-              }
-            });
+          //   }));
+          //   console.log('start processing');
+          //   findContours$.subscribe({
+          //     next(v) {
+          //       console.log(`findcontours returned ${v}`);
+          //       isProcessing = false;
+          //       setTimeout(processVideo, 10);
+          //     }
+          //   });
             
             // it = 0;
             // isProcessing = true;
             // setTimeout(processVideo, 10);
-          }
+          // }
 
           // let gridfound = ref.findContours();
           // let gridfound = false;
