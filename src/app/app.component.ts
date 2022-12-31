@@ -31,8 +31,8 @@ export class AppComponent {
   fileInput: ElementRef;
   @ViewChild('canvasInput')
   canvasInput: ElementRef;
-  @ViewChild('canvasOutput')
-  canvasOutput: ElementRef;
+  @ViewChild('canvasOutput') canvasOutput: ElementRef;
+  @ViewChild('canvasTest') canvasTest: ElementRef;
   ocrResult: any;
   data: boolean[][] = [];
   @Input() selRow = 0;
@@ -42,14 +42,10 @@ export class AppComponent {
   ocrOutput: string;
   gridContents: CellOption[] = [];
   rows = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  killerPuzzle: CellOption[][] = [];
-  // isKillerInput = false;
-  // killerCells: CellOption[] = [];
-  // colourIndex = 0;
-  // killer: Killer = new Killer();
-  // puzzleType = 'killer';
+  // killerPuzzle: CellOption[][] = [];
+
   showGrid = false;
-  streaming = false;
+  // streaming = false;
   // mainView = true;
   cameraView = false;
   @ViewChild('canvasVideo') canvasVideo: ElementRef;
@@ -66,51 +62,23 @@ export class AppComponent {
   videoElementHidden = true;
   canvasInputHidden = true;
   detectedSquareSize: number;
-  videoId = '';
-  videoCapture: any;
+  logText = '';
+  // videoId = '';
+  // videoCapture: any;
 
   constructor(private ngOpenCVService: NgOpenCVService) { }
   ngOnInit() {
-    // Always subscribe to the NgOpenCVService isReady$ observer before using a CV related function to ensure that the OpenCV has been
-    // successfully loaded
-    // this.ngOpenCVService.isReady$
-    //   .pipe(
-    //     // The OpenCV library has been successfully loaded if result.ready === true
-    //     filter((result: OpenCVLoadResult) => result.ready),
-    //     switchMap(() => {
-    //       // Load the face and eye classifiers files
-    //       return this.loadClassifiers();
-    //     })
-    //   )
-    //   .subscribe(() => {
-    //     // The classifiers have been succesfully loaded
-    //     this.classifiersLoaded.next(true);
-    //   });
 
-    //   this.gridContents = [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 0 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 4 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 5 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 6 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7 }, { values: [8], uniqueValue: null, cellNumber: 8 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 10 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11 }, { values: [4], uniqueValue: null, cellNumber: 12 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 15 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 16 }, { values: [6], uniqueValue: null, cellNumber: 17 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 18 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 19 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 20 }, { values: [6], uniqueValue: null, cellNumber: 21 }, { values: [9], uniqueValue: null, cellNumber: 22 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23 }, { values: [5], uniqueValue: null, cellNumber: 24 }, { values: [1], uniqueValue: null, cellNumber: 25 }, { values: [7], uniqueValue: null, cellNumber: 26 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 27 }, { values: [5], uniqueValue: null, cellNumber: 28 }, { values: [7], uniqueValue: null, cellNumber: 29 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 30 }, { values: [4], uniqueValue: null, cellNumber: 31 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 33 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 34 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 37 }, { values: [9], uniqueValue: null, cellNumber: 38 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 39 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 40 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 41 }, { values: [3], uniqueValue: null, cellNumber: 42 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 43 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 46 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48 }, { values: [1], uniqueValue: null, cellNumber: 49 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 50 }, { values: [8], uniqueValue: null, cellNumber: 51 }, { values: [2], uniqueValue: null, cellNumber: 52 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53 }, { values: [4], uniqueValue: null, cellNumber: 54 }, { values: [8], uniqueValue: null, cellNumber: 55 }, { values: [3], uniqueValue: null, cellNumber: 56 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57 }, { values: [6], uniqueValue: null, cellNumber: 58 }, { values: [2], uniqueValue: null, cellNumber: 59 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 60 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 61 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 62 }, { values: [5], uniqueValue: null, cellNumber: 63 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 64 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67 }, { values: [1], uniqueValue: null, cellNumber: 68 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 70 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71 }, { values: [6], uniqueValue: null, cellNumber: 72 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 76 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 80 }];
-    // this.gridContents = [{ values: [5], uniqueValue: null, cellNumber: 0 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3 }, { values: [2], uniqueValue: null, cellNumber: 4 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 5 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 6 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7 }, { values: [6], uniqueValue: null, cellNumber: 8 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9 }, { values: [8], uniqueValue: null, cellNumber: 10 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11 }, { values: [9], uniqueValue: null, cellNumber: 12 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 15 }, { values: [5], uniqueValue: null, cellNumber: 16 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 17 }, { values: [1], uniqueValue: null, cellNumber: 18 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 19 }, { values: [2], uniqueValue: null, cellNumber: 20 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 21 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 22 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23 }, { values: [7], uniqueValue: null, cellNumber: 24 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 25 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 26 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 27 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 28 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 29 }, { values: [8], uniqueValue: null, cellNumber: 30 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 31 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 33 }, { values: [3], uniqueValue: null, cellNumber: 34 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36 }, { values: [4], uniqueValue: null, cellNumber: 37 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 38 }, { values: [5], uniqueValue: null, cellNumber: 39 }, { values: [3], uniqueValue: null, cellNumber: 40 }, { values: [1], uniqueValue: null, cellNumber: 41 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 42 }, { values: [6], uniqueValue: null, cellNumber: 43 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45 }, { values: [1], uniqueValue: null, cellNumber: 46 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 49 }, { values: [2], uniqueValue: null, cellNumber: 50 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 51 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 52 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 54 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 55 }, { values: [9], uniqueValue: null, cellNumber: 56 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 58 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 59 }, { values: [6], uniqueValue: null, cellNumber: 60 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 61 }, { values: [8], uniqueValue: null, cellNumber: 62 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 63 }, { values: [7], uniqueValue: null, cellNumber: 64 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67 }, { values: [4], uniqueValue: null, cellNumber: 68 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69 }, { values: [1], uniqueValue: null, cellNumber: 70 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71 }, { values: [8], uniqueValue: null, cellNumber: 72 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75 }, { values: [5], uniqueValue: null, cellNumber: 76 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78 }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79 }, { values: [3], uniqueValue: null, cellNumber: 80 }];
-    // this.gridContents = [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 0, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1, isSelected: false }, { values: [4], uniqueValue: null, cellNumber: 2, isSelected: false }, { values: [7], uniqueValue: null, cellNumber: 3, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 4, isSelected: false }, { values: [8], uniqueValue: null, cellNumber: 5, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 6, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 8, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 10, isSelected: false }, { values: [9], uniqueValue: null, cellNumber: 11, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 12, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 15, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 16, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 17, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 18, isSelected: false }, { values: [6], uniqueValue: null, cellNumber: 19, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 20, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 21, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 22, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23, isSelected: false }, { values: [3], uniqueValue: null, cellNumber: 24, isSelected: false }, { values: [7], uniqueValue: null, cellNumber: 25, isSelected: false }, { values: [2], uniqueValue: null, cellNumber: 26, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 27, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 28, isSelected: false }, { values: [1], uniqueValue: null, cellNumber: 29, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 30, isSelected: false }, { values: [3], uniqueValue: null, cellNumber: 31, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 33, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 34, isSelected: false }, { values: [4], uniqueValue: null, cellNumber: 35, isSelected: false }, { values: [4], uniqueValue: null, cellNumber: 36, isSelected: false }, { values: [2], uniqueValue: null, cellNumber: 37, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 38, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 39, isSelected: false }, { values: [7], uniqueValue: null, cellNumber: 40, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 41, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 42, isSelected: false }, { values: [6], uniqueValue: null, cellNumber: 43, isSelected: false }, { values: [3], uniqueValue: null, cellNumber: 44, isSelected: false }, { values: [6], uniqueValue: null, cellNumber: 45, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 46, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48, isSelected: false }, { values: [5], uniqueValue: null, cellNumber: 49, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 50, isSelected: false }, { values: [7], uniqueValue: null, cellNumber: 51, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 52, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53, isSelected: false }, { values: [3], uniqueValue: null, cellNumber: 54, isSelected: false }, { values: [1], uniqueValue: null, cellNumber: 55, isSelected: false }, { values: [6], uniqueValue: null, cellNumber: 56, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 58, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 59, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 60, isSelected: false }, { values: [5], uniqueValue: null, cellNumber: 61, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 62, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 63, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 64, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 68, isSelected: false }, { values: [8], uniqueValue: null, cellNumber: 69, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 70, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 72, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74, isSelected: false }, { values: [3], uniqueValue: null, cellNumber: 75, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 76, isSelected: false }, { values: [9], uniqueValue: null, cellNumber: 77, isSelected: false }, { values: [1], uniqueValue: null, cellNumber: 78, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79, isSelected: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 80, isSelected: false }];
-    // // this.killerNumber = null;
-    // this.killerPuzzle = [[{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 0, isSelected: false, killerNumber: 24, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 10, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2, isSelected: false, killerNumber: 22, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 4, isSelected: false, killerNumber: 30, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 12, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 21, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 4], uniqueValue: null, cellNumber: 5, isSelected: false, killerNumber: 7, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 6, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 15, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7, isSelected: false, killerNumber: 20, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 8, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 16, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 17, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 4], uniqueValue: null, cellNumber: 18, isSelected: false, killerNumber: 7, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 19, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 27, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 20, isSelected: false, killerNumber: 17, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 28, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 29, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 22, isSelected: false, killerNumber: 13, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 31, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 24, isSelected: false, killerNumber: 10, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 33, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 34, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 25, isSelected: false, killerNumber: 16, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 26, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36, isSelected: false, killerNumber: 23, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 54, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 63, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6], uniqueValue: null, cellNumber: 37, isSelected: false, killerNumber: 7, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6], uniqueValue: null, cellNumber: 38, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 30, isSelected: false, killerNumber: 19, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 39, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 46, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32, isSelected: false, killerNumber: 33, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 41, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 50, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 51, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 52, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [6, 7, 8, 9], uniqueValue: null, cellNumber: 42, isSelected: false, killerNumber: 15, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [6, 7, 8, 9], uniqueValue: null, cellNumber: 43, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44, isSelected: false, killerNumber: 20, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 62, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [5, 6, 8, 9], uniqueValue: null, cellNumber: 55, isSelected: false, killerNumber: 14, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [5, 6, 8, 9], uniqueValue: null, cellNumber: 64, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 56, isSelected: false, killerNumber: 13, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 40, isSelected: false, killerNumber: 26, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 49, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 58, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 59, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 60, isSelected: false, killerNumber: 18, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4], uniqueValue: null, cellNumber: 61, isSelected: false, killerNumber: 5, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4], uniqueValue: null, cellNumber: 70, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 72, isSelected: false, killerNumber: 11, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66, isSelected: false, killerNumber: 24, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 68, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 76, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79, isSelected: false, killerNumber: 11, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 80, isSelected: false, killerNumber: null, killerBackground: 'FFFFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }]];
-    // this.killerPuzzle = [[{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 0, isSelected: false, killerNumber: 24, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 1, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 9, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 10, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 2, isSelected: false, killerNumber: 22, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 3, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 11, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 4, isSelected: false, killerNumber: 30, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 12, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 13, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 14, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 21, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 23, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 4], uniqueValue: null, cellNumber: 5, isSelected: false, killerNumber: 7, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 6, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 15, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 7, isSelected: false, killerNumber: 20, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 8, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 16, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 17, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 4], uniqueValue: null, cellNumber: 18, isSelected: false, killerNumber: 7, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 19, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 4], uniqueValue: null, cellNumber: 27, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 20, isSelected: false, killerNumber: 17, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 28, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 29, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 22, isSelected: false, killerNumber: 13, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 31, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 24, isSelected: false, killerNumber: 10, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 33, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7], uniqueValue: null, cellNumber: 34, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 25, isSelected: false, killerNumber: 16, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 26, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 35, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 36, isSelected: false, killerNumber: 23, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 45, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 54, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 63, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6], uniqueValue: null, cellNumber: 37, isSelected: false, killerNumber: 7, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6], uniqueValue: null, cellNumber: 38, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 30, isSelected: false, killerNumber: 19, killerBackground: '808080', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 39, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 46, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 47, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 48, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 32, isSelected: false, killerNumber: 33, killerBackground: '808080', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 41, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 50, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 51, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 52, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [6, 7, 8, 9], uniqueValue: null, cellNumber: 42, isSelected: false, killerNumber: 15, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [6, 7, 8, 9], uniqueValue: null, cellNumber: 43, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 44, isSelected: false, killerNumber: 20, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 53, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 62, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 71, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [5, 6, 8, 9], uniqueValue: null, cellNumber: 55, isSelected: false, killerNumber: 14, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [5, 6, 8, 9], uniqueValue: null, cellNumber: 64, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 56, isSelected: false, killerNumber: 13, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 65, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 74, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 40, isSelected: false, killerNumber: 26, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 49, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 57, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 58, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 59, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 60, isSelected: false, killerNumber: 18, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 69, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 78, isSelected: false, killerNumber: null, killerBackground: '00FFFF', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [1, 2, 3, 4], uniqueValue: null, cellNumber: 61, isSelected: false, killerNumber: 5, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4], uniqueValue: null, cellNumber: 70, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: true, killerBorderTop: false }], [{ values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 72, isSelected: false, killerNumber: 11, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 73, isSelected: false, killerNumber: null, killerBackground: 'FFFF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }], [{ values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 66, isSelected: false, killerNumber: 24, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 67, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 68, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: false, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 75, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 76, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: false, killerBorderTop: false }, { values: [1, 2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 77, isSelected: false, killerNumber: null, killerBackground: '00FF00', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: false }], [{ values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 79, isSelected: false, killerNumber: 11, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: true, killerBorderRight: false, killerBorderTop: true }, { values: [2, 3, 4, 5, 6, 7, 8, 9], uniqueValue: null, cellNumber: 80, isSelected: false, killerNumber: null, killerBackground: '808080', killerBorderBottom: true, killerBorderLeft: false, killerBorderRight: true, killerBorderTop: true }]];
-    // this.gridContents = [];
-    // this.killerPuzzle.forEach(cells => {
-    //   cells.forEach(cell => this.gridContents.push(cell));
-    // });
-    // this.gridContents.sort((a, b) => a.cellNumber > b.cellNumber ? 1 : -1);
-    // this.killer.setColours(this.killerPuzzle, this.gridContents);
 
     this.gridContents = [];
-    // this.isKillerInput = false;
-    // this.puzzleType = 'sudoku';
-    // this.gridContents[0] = new CellOption([4], 0);
+
     for (let index = 0; index < 81; index++) {
       this.gridContents.push(new CellOption([1, 2, 3, 4, 5, 6, 7, 8, 9], index));
 
     }
 
 
-    // setTimeout(() => { this.viewChildren.toArray()[0].inputElement.nativeElement.focus(); }, 0);
+
   }
 
   ngAfterViewInit(): void {
@@ -125,19 +93,7 @@ export class AppComponent {
       )
       .subscribe(() => { });
   }
-  // loadClassifiers(): Observable<any> {
-  //   return forkJoin(
-  //     // this.ngOpenCVService.createFileFromUrl(
-  //     //   'haarcascade_frontalface_default.xml',
-  //     //   `assets/opencv/data/haarcascades/haarcascade_frontalface_default.xml`
-  //     // ),
-  //     // this.ngOpenCVService.createFileFromUrl(
-  //     //   'haarcascade_eye.xml',
-  //     //   `assets/opencv/data/haarcascades/haarcascade_eye.xml`
-  //     // )
-  //   );
 
-  // }
   openFile() {
     this.videoRunning = false;
     this.localStream.getTracks().forEach(track => track.stop());
@@ -158,16 +114,12 @@ export class AppComponent {
 
 
           switchMap(() => {
-            // let cvs = document.createElement('canvas');
-            // cv1.imshow(cvs, `${reader.result}`);
-            // console.log(cvs.width);
-            // cvs.remove();
-            // console.log(`${reader.result}`);
+
             let txt = `${reader.result}`;
             let img = new Image();
             img.src = txt;
             console.log(img.width);
-            // return this.ngOpenCVService.loadImageToHTMLCanvas(txt, this.canvasInput.nativeElement);
+
             return this.loadImageToHTMLCanvas(txt, this.canvasInput.nativeElement);
           })
 
@@ -183,7 +135,6 @@ export class AppComponent {
 
         );
 
-      // this.canvasInputHidden = false;
       this.ocrResult = 'Loading file';
       reader.readAsDataURL(event.target.files[0]);
 
@@ -197,10 +148,9 @@ export class AppComponent {
       const ctx = canvas.getContext('2d');
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        console.log(img.width);
-        // canvas.width = img.width;
-        // canvas.height = img.naturalHeight;
+      img.onload = async () => {
+        console.log(`Image resizing ${img.width}`);
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let h = 400;
         let w = img.width * h / img.height;
@@ -212,8 +162,9 @@ export class AppComponent {
         canvas.height = h;
         ctx.drawImage(img, 0, 0, w, h);
         this.canvasInputHidden = false;
+        await this.showEl('grid');
         observer.next();
-        this.showEl('grid');
+
         observer.complete();
       };
       img.src = imageUrl;
@@ -221,10 +172,128 @@ export class AppComponent {
     });
   }
 
-  canvasInputChange() {
-    console.log('Canvas event');
+  // canvasInputChange() {
+  //   console.log('Canvas event');
 
-    // this.canvasInputWidth = this.canvasInput.nativeElement.width;
+  // }
+
+  test() {
+    let src = cv.imread('canvasInput');
+    let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+    let lines = new cv.Mat();
+    let color = new cv.Scalar(255, 0, 0, 255);
+    let anchor = new cv.Point(-1, -1);
+    let M = cv.Mat.ones(2, 2, cv.CV_8U);
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+    // cv.threshold(dst, dst, 50 , 255, cv.THRESH_OTSU)
+    // cv.medianBlur(dst, dst, 5);
+    // const adapt_type = cv.ADAPTIVE_THRESH_GAUSSIAN_C
+    // const thresh_type = cv.THRESH_BINARY_INV
+    // cv.adaptiveThreshold(dst, dst, 255, adapt_type, thresh_type, 11, 2)
+
+    cv.Canny(src, src, 50, 200, 3);
+    cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // You can try more different parameters
+    // cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2,0,0);
+    // draw lines
+    for (let i = 0; i < lines.rows; ++i) {
+      let rho = lines.data32F[i * 2];
+      let theta = lines.data32F[i * 2 + 1];
+      let a = Math.cos(theta);
+      let b = Math.sin(theta);
+      let x0 = a * rho;
+      let y0 = b * rho;
+      // let startPoint = {x: x0 - 1000 * b, y: y0 + 1000 * a};
+      // let endPoint = {x: x0 + 1000 * b, y: y0 - 1000 * a};
+      // let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4?
+      let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4 + 1]);
+      let endPoint = new cv.Point(lines.data32S[i * 4 + 2], lines.data32S[i * 4 + 3]);
+      // cv.line(dst, startPoint, endPoint, color);
+      cv.circle(dst, startPoint, 1, color, -1);
+    }
+    // cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // let x = this.getMask(10, 1, 'tr');
+    
+    this.detectCorners(src, dst, 75, 20, 10);
+    cv.imshow('canvasTest', dst);
+    src.delete(); dst.delete(); lines.delete();
+
+  }
+  findCorner(srcMat: any, shortLength: number, longLength: number, width: number, sensitivity: number, location: string) {
+    const left = (location.substring(1, 2) == 'l') ? true : false;
+    const top = (location.substring(0, 1) == 't') ? true : false;
+
+    for (let i = shortLength; i < srcMat.rows - shortLength + 1; i++) {
+      for (let j = shortLength; j < srcMat.cols - shortLength + 1; j++) {
+        let counter = 0;
+        if (top) {
+          for (let col = j - width; col < j + width + 1; col++) {
+            for (let row = i - shortLength; row < i + 1; row++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) == 0) { counter++; }
+            }
+            for (let row = i; row < i + longLength + 1; row++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) > 0) { counter++; }
+            }
+          }
+
+        } else {
+          for (let col = j - width; col < j + width + 1; col++) {
+            for (let row = i - longLength; row < i + 1; row++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) > 0) { counter++; }
+            }
+            for (let row = i; row < i + shortLength + 1; row++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) == 0) { counter++; }
+            }
+          }
+
+        }
+        if (left) {
+          for (let row = i - width; row < i + width + 1; row++) {
+            for (let col = j - shortLength; col < j; col++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) == 0) { counter++; }
+            }
+            for (let col = j; col < j + longLength + 1; col++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) > 0) { counter++; }
+            }
+          }
+        } else {
+          for (let row = i - width; row < i + width + 1; row++) {
+            for (let col = j - longLength; col < j; col++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) > 0) { counter++; }
+            }
+            for (let col = j; col < j + shortLength + 1; col++) {
+              if (srcMat.ucharAt(row, col * srcMat.channels()) == 0) { counter++; }
+            }
+          }
+        }
+        if (counter > (2 * width + 1) * (shortLength + longLength + 1) * sensitivity) {
+          console.log(`${location} corner found at row ${i} column ${j}`);
+        }
+      }
+    }
+
+  }
+  getMask(length: number, thickness: number, location: string) {
+    const dim = length * 2 + 1;
+    const xoff = (location.substring(1, 2) == 'l') ? length : 0;
+    const yoff = (location.substring(0, 1) == 't') ? length : 0;
+
+    let M = cv.Mat.zeros(dim, dim, cv.CV_8U);
+
+    for (let i = yoff; i < yoff + length + 1; i++) {
+      for (let j = length - thickness; j < length + 1 + thickness; j++) {
+
+        M.data[i * M.rows + j] = 255;
+      }
+    }
+    for (let j = xoff; j < xoff + length + 1; j++) {
+      for (let i = length - thickness; i < length + 1 + thickness; i++) {
+
+        M.data[i * M.rows + j] = 255;
+      }
+    }
+
+    return M;
   }
 
   findContours(): boolean {
@@ -241,12 +310,7 @@ export class AppComponent {
     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
 
     let contours = new cv.MatVector();
-    // let hierarchy = new cv.Mat();
 
-
-
-
-    // let ksize = new cv.Size(4, 4);
     let anchor = new cv.Point(-1, -1);
     let M = cv.Mat.ones(4, 4, cv.CV_8U);
     cv.Canny(dst, dst, 50, 100, 3, true);
@@ -254,19 +318,19 @@ export class AppComponent {
 
     cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
 
-    this.grid = this.detectCorners(dst, src, 75, 5, 5);
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-    // cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
-    // let img = 
+    // const rho = 2;
+    // const theta = Math.PI/180;
+    // const thresh =  400;
+    // lines = cv.HoughLines(dst, rho, theta, thresh);
+    cv.imshow(this.canvasTest.nativeElement.id, dst);
+
 
     cv.imshow(this.canvasOutput.nativeElement.id, src);
-    // try {
-    //   // this.doOCR(this.grid);
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    this.grid = this.detectCorners(dst, src, 75, 20, 10);
 
-    // src.delete(); dst.delete(); contours.delete();
+
+
+
     if (this.grid.length == 0) {
       return false;
     }
@@ -282,6 +346,8 @@ export class AppComponent {
     let bottomRightCoords: Coord[] = [];
     if (width % 2 == 0) { width++ }
     const offset = Math.floor(width / 2);
+    let color = new cv.Scalar(255, 0, 0, 255);
+    let color1 = new cv.Scalar(255, 255, 0, 255);
 
 
 
@@ -314,21 +380,29 @@ export class AppComponent {
         if (longRight && longDown && !shortLeft && !shortUp) {
 
           topLeftCoords.push(new Coord(i, j));
+          console.log('Top left found');
+          let p = new cv.Point(i,j);
+          cv.circle(outData,p, 2, color, -1);
           // console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
           // console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
         }
         if (longLeft && longDown && !shortRight && !shortUp) {
 
           topRightCoords.push(new Coord(i, j));
+          console.log('Top right found');
+          let p = new cv.Point(i,j);
+          cv.circle(outData,p, 2, color1, -1);
         }
 
         if (longLeft && longUp && !shortRight && !shortDown) {
 
           bottomRightCoords.push(new Coord(i, j));
+          console.log('Bottom right found');
         }
         if (longRight && longUp && !shortLeft && !shortDown) {
 
           bottomLeftCoords.push(new Coord(i, j));
+          console.log('Bottom left found');
         }
 
       }
@@ -350,7 +424,7 @@ export class AppComponent {
       let p3 = new cv.Point(points[3].col, points[3].row);
 
       let color = new cv.Scalar(255, 0, 255);
-      cv.line(outData, p0, p1, color);
+      // cv.line(outData, p0, p1, color);
       // cv.line(outData, p2, p3, color);
       // cv.line(outData, p0, p2, color);
       // cv.line(outData, p1, p3, color);
@@ -359,7 +433,7 @@ export class AppComponent {
         for (let col = 0; col < coords.length - 1; col++) {
           let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row));
           let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col), Math.floor(coords[row + 1][col + 1].row));
-          // cv.rectangle(outData, pt, pb, color1);
+          // cv.rectangle(srcData, pt, pb, color1);
         }
       }
 
@@ -413,10 +487,19 @@ export class AppComponent {
         while (linePresent && Math.abs(count) < length + 1) {
           linePresent = false;
           for (let c = this.checkRange(col - offset, data[row].length - 1); c < this.checkRange(col + offset + 1, data[row].length - 1); c++) {
-            if (data[this.checkRange(row + count, data.length - 1)][c]) { linePresent = true; }
+            if (data[this.checkRange(row + count, data.length - 1)][c]) {
+              linePresent = true;
+            }
           }
           if (dir == 'down') { count++; } else { count--; };
         }
+        if (linePresent) {
+          let color1 = new cv.Scalar(255, 0, 0);
+          let p0 = new cv.Point(col, row + count);
+          let p1 = new cv.Point(col, row);
+          // console.log(`Vertical line at row ${row}, col ${col}: length ${count} `)
+        }
+
         break;
 
 
@@ -428,6 +511,12 @@ export class AppComponent {
             if (data[r][this.checkRange(col + count, data[row].length - 1)]) { linePresent = true; }
           }
           if (dir == 'right') { count++; } else { count--; };
+        }
+        if (linePresent) {
+          let color1 = new cv.Scalar(255, 0, 0);
+          let p0 = new cv.Point(col, row + count);
+          let p1 = new cv.Point(col, row);
+          // console.log(`Horizontal line at row ${row}, col ${col}: length ${count} `)
         }
         break;
 
@@ -483,6 +572,7 @@ export class AppComponent {
     if (squareExists == 1) {
       console.log(topLeft.row - bottomLeft.row)
       this.detectedSquareSize = bottomLeft.row - topLeft.row;
+      this.logText = `Top left: ${topLeft.row}, ${topLeft.col} Bottom right: ${bottomRight.row}, ${bottomRight.col}`;
       return [topLeft, topRight, bottomLeft, bottomRight];
     } else {
       return [];
@@ -541,103 +631,7 @@ export class AppComponent {
     return (n < 0) ? 0 : n;
   }
 
-  // getCount(x: number, y: number, data: any, offset: number, length: number, dir: string): any {
-  //   let pixelPresent = 0;
-  //   for (let yy = y - offset; yy < y + offset + 1; yy++) {
-  //     for (let xx = 0; xx < length + 1; xx++) {
-  //       if (data.ucharAt(yy, (x + xx) * data.channels() + 1) > 0) {
-  //         pixelPresent++;
-  //       }
-  //     }
-  //   }
-  //   return pixelPresent;
-  // }
-  // test() {
-  //   console.log('clicked');
-  // }
 
-  // async readGrid1() {
-  //   for (let row = 0; row < 9; row++) {
-  //     for (let col = 0; col < 9; col++) {
-  //       this.selRow = row;
-  //       this.selCol = col;
-  //       await this.showEl();
-  //       // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-
-  //       // const img = canvas.toDataURL('image/png');
-  //       // await this.doOCR(row, col, img);
-  //     }
-  //   }
-  // }
-
-  // async readGrid() {
-  //   let src = cv.imread('canvasOutput');
-  //   cv.threshold(src, src, 128, 255, cv.THRESH_BINARY);
-  //   let dst = new cv.Mat();
-  //   let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-  //   let ctx = canvas.getContext('2d');
-  //   let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-  //   this.ocrResult = "Recognising...";
-  //   const worker = createWorker({
-  //     // logger: m => console.log(m),
-  //   });
-
-  //   await worker.load();
-  //   await worker.loadLanguage('eng');
-
-  //   await worker.initialize('eng');
-  //   await worker.setParameters({
-  //     tessedit_char_whitelist: '123456789'
-  //   });
-  //   await worker.setParameters({
-  //     tessedit_pageseg_mode: Tesseract.PSM.SINGLE_CHAR
-  //   });
-  //   // await worker.recognize(this.elOutput.nativeElement.id);
-  //   for (let i = 0; i < 81; i++) {
-  //     this.gridContents[i].values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  //     this.gridContents[i].uniqueValue = null;
-  //   }
-  //   for (let row = 0; row < 9; row++) {
-  //     for (let col = 0; col < 9; col++) {
-  //       let r = new Rectangle(this.grid[row][col], this.grid[row + 1][col + 1]);
-  //       let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
-  //       dst = src.roi(rect);
-  //       // let count = 0;
-  //       // for (let i = 0; i < dst.rows; i++) {
-  //       //   for (let j = 0; j < dst.cols; j++) {
-  //       //     if (dst.ucharAt(i, j * dst.channels() + 1) > 0) { count++ };
-  //       //   }
-  //       // }
-  //       // console.log('count = ' + count + '  Diff pixels ' + ((dst.rows * dst.cols - count) < 10));
-  //       // if (!((dst.rows * dst.cols - count) < 10)) {
-  //       cv.imshow(this.elOutput.nativeElement.id, dst);
-
-  //       const img = canvas.toDataURL('image/png');
-  //       const { data: { text } } = await worker.recognize(img);
-  //       // console.log('Row ' + row + '   Col ' + col + '  Character ' + text);
-  //       if (!isNaN(parseInt(text))) {
-  //         this.gridContents[row * 9 + col].values = [parseInt(text)];
-  //         this.gridContents[row * 9 + col].uniqueValue = parseInt(text);
-  //       }
-
-  //       // } else {
-  //       // console.log('Row ' + row + '   Col ' + col + '  Character ');
-  //       // }
-
-  //     }
-  //   }
-  //   // const img = canvas.toDataURL('image/png');
-  //   // const { data: { text } } = await worker.recognize(img);
-  //   // console.log(text);
-  //   // this.ocrOutput = text;
-  //   await worker.terminate();
-  //   //   }
-  //   // }  
-
-  //   // this.ocrResult = words;
-  //   // console.log(words);
-  // }
 
   async doOCR(scope) {
     this.gridContents = [];
@@ -646,7 +640,7 @@ export class AppComponent {
 
     }
 
-    // this.ocrResult = "Recognising...";
+
     const worker = createWorker({
       // logger: m => console.log(m),
     });
@@ -678,7 +672,7 @@ export class AppComponent {
               chars.push('');
             }
 
-            // this.txt = text;
+
 
           }
           else {
@@ -687,7 +681,7 @@ export class AppComponent {
 
         }
       }
-      // console.log(chars);
+
       chars.forEach((value, index) => {
         if (value !== '') {
           this.gridContents[index].values = [Number(value)];
@@ -700,8 +694,7 @@ export class AppComponent {
     if (scope == 'cell') {
       if (this.getElementData(this.selRow, this.selCol)) {
         let { data: { text, confidence, symbols } } = await worker.recognize(this.getElementData(this.selRow, this.selCol));
-        // console.log('cell content  ' + text + Number(this.selRow * 9 + this.selCol));
-        // console.log(this.gridContents[this.selRow * 9 + this.selCol].values);
+
 
         symbols.sort((s1, s2) => s2.confidence - s1.confidence);
         text = symbols[0].text;
@@ -709,7 +702,7 @@ export class AppComponent {
         this.gridContents[Number(this.selRow * 9) + Number(this.selCol)].uniqueValue = Number(text);
 
 
-        // console.log(symbols);
+
       }
 
 
@@ -725,19 +718,16 @@ export class AppComponent {
   }
   imgInfo(dst: any) {
     let midRow = Math.floor(dst.rows / 2);
-    // console.log('row ' + midRow);
+
     let max = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());
     let min = dst.ucharAt(midRow, Math.floor(dst.cols / 10) * dst.channels());;
 
     for (let col = Math.floor(dst.cols / 10); col < dst.cols - Math.floor(dst.cols / 10); col++) {
-      // console.log(dst.ucharAt(midRow, col * dst.channels()) + ' ' + dst.ucharAt(midRow, col * dst.channels() + 1)
-      // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 2)
-      // + ' ' + dst.ucharAt(midRow, col * dst.channels() + 3));
 
       if (dst.ucharAt(midRow, col * dst.channels()) > max) { max = dst.ucharAt(midRow, col * dst.channels()); }
       if (dst.ucharAt(midRow, col * dst.channels()) < min) { min = dst.ucharAt(midRow, col * dst.channels()); }
     }
-    // console.log((max - min) > 50);
+
     return ((max - min) > 50);
   }
 
@@ -750,14 +740,10 @@ export class AppComponent {
       let rect = new cv.Rect(r.left + 3, r.top + 3, r.width - 6, r.height - 6);
       dst = src.roi(rect);
       if (this.imgInfo(dst)) {
-        // if (true) {  
-        // cv.threshold(dst, dst, 128, 255, cv.THRESH_OTSU);
+
         let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
         cv.imshow(this.elOutput.nativeElement.id, dst);
-        // let ctx = canvas.getContext('2d');
-        // let data = ctx.getImageData(0,0,canvas.width,canvas.height);
-        // console.log(data);
-        // this.txt=canvas.toDataURL('image/png');
+
         return canvas.toDataURL('image/png');
       } else {
         return null;
@@ -808,153 +794,14 @@ export class AppComponent {
 
   }
 
-  // this.findContours();
-  // this.doOCR(scope);
-  // if (!this.gridFound) {
-  //   if (this.findContours()) {
-  //     this.gridFound = true;
-  //     return;
-  //   }
-  //   else {
-  //     return;
-  //   }
-
-  // }
-
-  // if (this.gridFound && !this.recognitionComplete) {
-  //   try {
-
-  //     this.doOCR(scope);
-  //     this.recognitionComplete = true;
-  //     this.cameraText = 'Recognised';
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-
-  // }
 
 
-
-  // test() {
-  //   // let canvas = <HTMLCanvasElement>document.getElementById('elOutput');
-  //   //   this.txt =  canvas.toDataURL('image/png');
-  //   this.getElementData(0, 1);
-  //   this.getElementData(0, 5);
-  // }
-  // cellSelected(cell: CellOption) {
-  //   if (this.isKillerInput) {
-  //     let alreadySelected = false;
-  //     this.killerPuzzle.forEach(group => {
-  //       if (group.includes(cell)) { alreadySelected = true; }
-  //     });
-  //     if (alreadySelected) { return; }
-  //     if (cell.isSelected) {
-  //       cell.killerBorderBottom = false;
-  //       cell.killerBorderLeft = false;
-  //       cell.killerBorderRight = false;
-  //       cell.killerBorderTop = false;
-  //       this.killerCells.splice(this.killerCells.indexOf(cell), 1);
-  //     } else {
-  //       this.killerCells.push(cell);
-  //     }
-
-  //     if (this.areContiguousCells(this.killerCells)) {
-  //       cell.isSelected = (cell.isSelected) ? false : true;
-
-  //     } else {
-  //       if (cell.isSelected) {
-  //         this.killerCells.push(cell);
-  //       } else {
-
-  //         this.killerCells.splice(this.killerCells.indexOf(cell), 1);
-  //       }
-  //     }
-
-  //     this.setKillerBorders();
-
-  //   }
-
-  // }
-  // areContiguousCells(cells: CellOption[]): boolean {
-  //   if (cells.length === 1) {
-  //     return true;
-  //   }
-
-  //   for (const c of cells) {
-  //     let result = false;
-  //     const row = Math.floor(c.cellNumber / 9);
-  //     const col = c.cellNumber % 9;
-  //     cells.forEach(p => {
-
-  //       const row1 = Math.floor(p.cellNumber / 9);
-  //       const col1 = p.cellNumber % 9;
-  //       if (row === row1 && Math.abs(col - col1) === 1) {
-  //         result = true;
-  //       }
-  //       if (col === col1 && Math.abs(row - row1) === 1) {
-  //         result = true;
-  //       }
-
-  //     });
-
-  //     if (!result) { return false; }
-  //   }
-  //   return true;
-
-  // }
-
-  // setKillerBorders() {
-  //   this.killerCells.forEach(c => {
-  //     c.killerBorderBottom = false;
-  //     c.killerBorderLeft = false;
-  //     c.killerBorderRight = false;
-  //     c.killerBorderTop = false;
-  //     // c.killerBackground = this.colours[this.colourIndex];
-  //   });
-  //   this.colourIndex++;
-  //   this.colourIndex = this.colourIndex % 14;
-  //   this.killerCells.sort((a, b) => a.cellNumber > b.cellNumber ? 1 : -1);
-  //   for (const c of this.killerCells) {
-  //     const _row = Math.floor(c.cellNumber / 9);
-  //     const _col = c.cellNumber % 9;
-  //     let _top = true;
-  //     let _bottom = true;
-  //     let _right = true;
-  //     let _left = true;
-
-  //     this.killerCells.forEach(cell => {
-  //       if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 + 1 === _col) { _left = false; }
-  //       if (Math.floor(cell.cellNumber / 9) === _row && cell.cellNumber % 9 - 1 === _col) { _right = false; }
-  //       if (Math.floor(cell.cellNumber / 9) + 1 === _row && cell.cellNumber % 9 === _col) { _top = false; }
-  //       if (Math.floor(cell.cellNumber / 9) - 1 === _row && cell.cellNumber % 9 === _col) { _bottom = false; }
-  //     });
-
-  //     c.killerBorderTop = _top;
-  //     c.killerBorderBottom = _bottom;
-  //     c.killerBorderLeft = _left;
-  //     c.killerBorderRight = _right;
-  //   }
-
-
-  // }
-  // setNewValue(e) {
-
-
-  //   this.gridContents[e.key].values = e.value;
-  //   const next = e.key + 1;
-
-  // }
-  // xxx() {
-  //   console.log('xxx');
-  // }
-
-  
-  scanInputCanvas(){
+  scanInputCanvas() {
     let findContours = this.findContours();
     function scan() {
-      if(findContours){
+      if (findContours) {
         return;
-      }else{
+      } else {
         setTimeout(scan, 10);
       }
     }
@@ -962,44 +809,27 @@ export class AppComponent {
   }
 
   startVideo(action: boolean) {
+
     if (this.videoRunning) {
-      // this.video.pause();
+
       this.videoRunning = false;
       this.localStream.getTracks().forEach(track => track.stop());
       this.videoElementHidden = true;
-      // this.video.remove();
-      // this.localStream = null;
-      document.getElementById('videoBtn').innerText = 'Scan puzzle';
 
-      // this.video.remove();
+      document.getElementById('videoBtn').innerText = 'Scan puzzle';
 
       return;
     }
-    
+
     document.getElementById('videoBtn').innerText = 'Cancel';
     this.ocrResult = 'Align grid with rectangle';
     this.showGrid = false;
     this.canvasInputHidden = true;
     this.videoElementHidden = false;
 
-    // if(this.video){
-    //   this.video.srcObject = this.localStream;
 
-    //   this.videoRunning = true;
-    //   document.getElementById('videoBtn').innerText = 'Cancel';
-    //   return;
-    // }
-
-    this.streaming = !this.streaming;
-    // let streaming = action;
-    // this.video = document.getElementById('videoInput') as HTMLVideoElement;
-    // let video = document.createElement('video');
     let video = document.getElementById('videoInput') as HTMLVideoElement;
-    // this.video  = video;
-    // this.videoId = 'videoInput';
-    // // video.id = Date().toString();
-    // const div = document.getElementById('videoDiv');
-    // div.appendChild(video);
+
     var ref = this;
     this.videoRunning = true;
     const videoConstraints = {
@@ -1011,106 +841,78 @@ export class AppComponent {
     );
     navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false })
       .then(async function (stream) {
-        // ref.localStream = stream;
+
         ref.localStream = stream;
-        // ref.video = document.getElementById('videoInput') as HTMLVideoElement;
+
         video.srcObject = stream;
 
         console.log(stream.id);
-        // video.onloadedmetadata = function (e) { video.play() }
+
         await video.play();
-        // ref.scanInputCanvas();
-        console.log(video.currentTime);
-        console.log(video.offsetWidth);
-        console.log(video.offsetHeight);
+
         video.height = video.videoHeight;
         video.width = video.videoWidth;
-        let src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-        let rect = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
-
-        let cap = new cv.VideoCapture(video);
-        // let cap = ref.videoCapture;
-        const squareSize = (video.height > video.width) ? video.width - 40 : video.height - 40;
-
-        cv.rectangle(rect, new cv.Point((video.width - squareSize) / 2, (video.height - squareSize) / 2),
-          new cv.Point(video.width - (video.width - squareSize) / 2, video.height - (video.height - squareSize) / 2),
-          [255, 0, 0, 255], 1);
-        let canvas = document.getElementById('canvasInput') as HTMLCanvasElement;
+        let canvas = document.getElementById('canvasVideo') as HTMLCanvasElement;
+        canvas.height = video.height;
+        canvas.width = video.width;
         let ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const squareSize = (video.height > video.width) ? video.width - 40 : video.height - 40;
+        ctx.beginPath();
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = "red";
+        console.log(`canvas height ${canvas.height}`);
+        ctx.rect(Math.trunc((video.width - squareSize) / 2), Math.trunc((video.height - squareSize) / 2), squareSize, squareSize);
+        ctx.stroke();
+
+        canvas = document.getElementById('canvasInput') as HTMLCanvasElement;
+        ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let srcMat = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+
+        let cap = new cv.VideoCapture(video);
+
+
+
+
         canvas.width = video.width;
         canvas.height = video.height;
-        cv.imshow('canvasVideo', rect);
-        const FPS = 30;
-        let it = 0;
-        let isProcessing = false;
 
-        function processVideo() {
-          if(!ref.videoRunning){return;}
-          // start processing.
-          cap.read(src);
-          let begin = Date();
-          // while(Date() < begin + 500){}
 
-          cv.imshow('canvasInput', src);
-          let gridFound =  ref.findContours();
+
+
+        async function processVideo() {
+          if (!ref.videoRunning) { return; }
+
+          cap.read(srcMat);
+
+
+          cv.imshow('canvasInput', srcMat);
+          let gridFound = ref.findContours();
+
           console.log(`Gridfound = ${gridFound}`);
-          setTimeout(processVideo, 10);
-          // if(it > 100){
-          //   console.log('stop processing');
-          //   isProcessing = false;
-          // }
-          // if(isProcessing){
-          //   it++;
-          //   setTimeout(processVideo, 10);
-          // } else{
-          //   const findContours$ = new  Observable((subsriber => {
-          //     isProcessing = true
-          //     const v = ref.findContours();
-          //     setTimeout(() => {
-          //         subsriber.next(v);
-          //     subsriber.complete();
-          //     }, 500);
-            
-          //   }));
-          //   console.log('start processing');
-          //   findContours$.subscribe({
-          //     next(v) {
-          //       console.log(`findcontours returned ${v}`);
-          //       isProcessing = false;
-          //       setTimeout(processVideo, 10);
-          //     }
-          //   });
-            
-            // it = 0;
-            // isProcessing = true;
-            // setTimeout(processVideo, 10);
-          // }
+          if (gridFound) {
+            if (ref.detectedSquareSize > squareSize * 0.9) {
 
-          // let gridfound = ref.findContours();
-          // let gridfound = false;
-          // ref.txt = 'Grid found: ' + gridfound;
-          // if (gridfound) {
-          //   if (ref.detectedSquareSize > squareSize) { {}
-          //     console.log('grid found');
-          //     ref.ocrResult = 'Grid found... analyzing content';
-          //     ref.videoRunning = false;
-          //     ref.localStream.getTracks().forEach(track => track.stop());
-          //     ref.videoElementHidden = true;
-          //     ref.doOCR('grid');
-          //     src.delete();
-          //     cap = null;
-          //     return;
+              ref.ocrOutput = 'Grid found....processing';
+              try {
+                await ref.doOCR('grid');
+                ref.videoRunning = false;
+                ref.videoElementHidden = true;
+
+                document.getElementById('videoBtn').innerText = 'Scan puzzle';
+                stream.getTracks().forEach(track => track.stop());
+              } catch (error) {
+                gridFound = false;
+              }
+
+            } else {
+              gridFound = false;
+            }
 
 
-          //   }
-
-
-          // } else {
-          //   setTimeout(processVideo, 0);
-          // }
-
-
+          }
+          if (!gridFound) { setTimeout(processVideo, 10) };
 
         }
 
@@ -1121,323 +923,5 @@ export class AppComponent {
 
       });
   }
-  // stopVideo() {
-  //   this.videoRunning = false;
-  //   this.localStream.getTracks().forEach(track => track.stop());
-  // }
 
-  // grabFrame() {
-  //   let start = Date.now();
-
-  //   let ref = this;
-  //   let n = 0;
-  //   this.gridFound = false;
-  //   this.recognitionComplete = false;
-  //   let begin = Date.now();
-  //   this.attemptNumber = 0;
-  //   this.cameraText = 'starting...';
-
-  //   for (let i = 0; i < 500; i++) {
-  //     if (this.recognitionComplete) { break; }
-  //     setTimeout(compute, 50);
-  //   }
-
-
-  //   function compute() {
-  //     let analyzeFrame = new Promise(function (gridFound, gridNotFound) {
-  //       let found = false;
-  //       let cap = new cv.VideoCapture(ref.video);
-  //       let src = new cv.Mat(ref.video.videoHeight, ref.video.videoWidth, cv.CV_8UC4);
-  //       cap.read(src);
-
-  //       cv.imshow('canvasVideoRaw', src);
-  //       src.delete();
-
-  //       ref.attemptNumber++;
-  //       ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
-  //       found = ref.findContours();
-
-
-
-  //       if (found) {
-  //         gridFound(true);
-  //       } else {
-  //         gridFound(false);
-  //       }
-  //     });
-
-  //     analyzeFrame.then(
-
-  //       (b) => {
-  //         if (b) {
-  //           ref.doOCR('grid');
-  //           ref.recognitionComplete = true;
-  //         } else {
-  //           console.log('analyzeFrame reurned false');
-  //         }
-  //       }
-  //     )
-  //   }
-
-
-
-  // for (let i = 0; i < 10; i++) {
-  //   findGrid().then(
-  //     () => { ref.doOCR('grid'); }
-  //   );
-  // setTimeout(findGrid, 10);
-  // this.cameraText = 'Analyzing....attempt ' + i;
-  // }
-  // while (!this.gridFound ) {
-
-  // }
-
-  // if (this.gridFound){
-  //   this.cameraText = 'Grid found ....recognising';
-  //   this.doOCR('grid');
-  // }
-
-  // function findGrid(): boolean {
-
-
-
-  //   ref.attemptNumber++;
-  //   ref.cameraText = 'Analyzing....attempt ' + ref.attemptNumber;
-  //   return ref.findContours();
-
-  // }
-
-  // function analyze() {
-  //   try {
-
-  //     let src = cv.imread(ref.canvasVideoRaw.nativeElement.id);
-  //     // cv.imshow('canvasInput', src);
-  //     ref.showEl('grid');
-  //     console.log(Date.now() - begin);
-  //     let delay = Date.now() - begin + 100;
-  //     src.delete();
-  //     n = n + 1;
-  //     ref.cameraText = 'Attempt' + n;
-  //     if (!ref.gridFound) {
-  //       n = n + 1;
-  //       ref.showEl('grid');
-  //     } else {
-  //       ref.showEl('grid');
-  //     }
-
-  //     if (ref.recognitionComplete) {
-  //       ref.stopVideo();
-  //     }
-  //     // if (ref.videoRunning) {
-  //     //   setTimeout(analyze, delay);
-  //     // }
-
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
-  // setTimeout(analyze, 0);
-
-
-
-
-  // }
-
-  // scan() {
-  //   this.mainView = !this.mainView;
-  //   this.cameraView = !this.cameraView;
-  // }
-
-  // findCorners() {
-  //   let src = cv.imread(this.canvasInput.nativeElement.id);
-  //   let dst = cv.Mat.ones(src.rows, src.cols, cv.CV_8UC3);
-  //   let corners = new cv.Mat();
-  //   cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
-  //   cv.cornerHarris(src, corners, 2, 3, 0.04);
-  //   // cv.cvtColor(corners, corners, cv.COLOR_GRAY2RGBA);
-  //   // corners.convertTo(corners, cv.CV_8U, 255);
-  //   // cv.cvtColor(corners,  cv.COLOR_RGBA2GRAY);
-  //   // cv.goodFeaturesToTrack(src, corners, 4, 0.5, 50);
-  //   let M = cv.Mat.ones(4, 4, cv.CV_8U);
-  //   let anchor = new cv.Point(-1, -1);
-  //   // You can try more different parameters
-
-  //   cv.dilate(corners, corners, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-  //   cv.imshow(this.canvasOutput.nativeElement.id, corners);
-  //   src.delete(); dst.delete(); corners.delete();
-
-  // }
-  // detectLines(data: any, bandWidth: number): Line[] {
-
-  //   let start = new cv.Point(24, 130);
-  //   let end = new cv.Point(281, 110);
-  //   let color = new cv.Scalar(255, 0, 0);
-  //   cv.line(data, start, end, color);
-  //   start = new cv.Point(0, 45);
-  //   end = new cv.Point(300, 45);
-  //   cv.line(data, start, end, color);
-  //   let detectedLines: Line[] = []
-  //   let currLine: Line = null;
-  //   const offset = Math.floor(bandWidth / 2);
-  //   for (let i = offset; i < data.size().height - offset; ++i) {
-  //     for (let w = 0; w < data.size().width - 1; w++) {
-  //       let pixelPresent = 0;
-  //       for (let j = -offset; j < offset; j++) {
-  //         if (data.ucharAt(i + j, (w + 1) * data.channels() + 1) > 0) {
-  //           pixelPresent = j;
-  //         }
-  //       }
-  //       // let pixelPresent = data.ucharAt(i - 2, w * 3) > 0 || data.ucharAt(i - 1, w * 3) > 0 || data.ucharAt(i, w * 3) > 0
-  //       //   || data.ucharAt(i + 1, w * 3) > 0 || data.ucharAt(i + 2, w * 3) > 0;
-  //       if (!(pixelPresent == 0) && currLine) {
-  //         currLine.length++;
-  //         currLine.x2 = w;
-  //         currLine.y2 = i + pixelPresent;
-  //       } else {
-  //         if (currLine) {
-  //           let l = new Line()
-  //           l.length = currLine.length;
-  //           l.x1 = currLine.x1;
-  //           l.y1 = currLine.y1;
-  //           l.x2 = currLine.x2;
-  //           l.y2 = currLine.y2;
-  //           detectedLines.push(l);
-  //           currLine = null;
-  //         } else {
-  //           if (!(pixelPresent == 0)) {
-  //             currLine = new Line();
-  //             currLine.x1 = w;
-  //             currLine.y1 = i + pixelPresent;
-  //           }
-
-  //         }
-  //       }
-
-  //     }
-  //     if (detectedLines.length > 1) {
-  //       detectedLines.sort((a, b) => b.length - a.length);
-  //       console.log('Line ' + i + ' lines ' + detectedLines.length + ' Max length ' + detectedLines[0].length
-  //         + ' Coords ' + detectedLines[0].x1, detectedLines[0].y1 + ' to ' + detectedLines[0].x2, detectedLines[0].y2);
-
-  //     }
-
-  //     detectedLines = [];
-  //   }
-
-
-
-  //   // for (let i = 0; i < data.size().height; ++i) {
-  //   //   console.log('Row ' + i);
-  //   //   for (let j = 0; j < data.size().width; j++) {
-  //   //     console.log(data.ucharAt(i, j * 3) + ' , ' + data.ucharAt(i, j * 3 + 1) + ' , ' + data.ucharAt(i, j * 3 + 2));
-  //   //   }
-
-  //   //   // console.log(i);
-  //   // }
-  //   return [];
-  // }
-  // for (let i = 0; i < srcData.rows; i++) {
-
-  //   for (let j = 0; j < srcData.cols; j++) {
-  //     let count = 0;
-  //     let rowStart = (i - offset < 0) ? 0 : i - offset;
-  //     let rowEnd = (i + offset + 1 > srcData.rows) ? srcData.rows : i + offset + 1;
-  //     const colStart = j;
-  //     let colEnd = (j + length > srcData.cols) ? srcData.cols : j + length;
-  //     for (let m = rowStart; m < rowEnd; m++) {
-  //       for (let n = colStart; n < colEnd; n++)
-
-  //         if (data[m][n]) { count++ };
-
-  //     }
-
-  //   }
-  // }
-  // for (let j = 0; j < srcData.cols; j++) {
-
-  //   for (let i = 0; i < srcData.rows; i++) {
-  //     let count = 0;
-  //     let rowStart = i;
-  //     let rowEnd = (i + length > srcData.rows) ? srcData.rows : i + length;
-  //     const colStart = (j - offset < 0) ? 0 : j - offset;
-  //     let colEnd = (j + offset + 1 > srcData.cols) ? srcData.cols : j + offset + 1;
-  //     for (let m = rowStart; m < rowEnd; m++) {
-  //       for (let n = colStart; n < colEnd; n++)
-
-  //         if (data[m][n]) { count++ };
-  //     }
-
-  //   }
-  // }
-
-  // for (let row = 0; row < srcData.rows; row++) {
-  //   for (let col = 0; col < srcData.rows; col++) {
-  //     let count = 0;
-  //     let rowStart = (row - offset < 0) ? 0 : row - offset;
-  //     let rowEnd = (row + offset + 1 > srcData.rows) ? srcData.rows : row + offset + 1;
-  //     let colStart = (col - offset < 0) ? 0 : col - offset;
-  //     let colEnd = (col + offset > srcData.cols) ? srcData.cols : col + offset;
-  //     let pixelPresent = true;
-
-  //     // while (pixelPresent && col + count < srcData.cols && Math.abs(count) < length) {
-  //     //   pixelPresent = false;
-
-  //     //   for (let i = rowStart; i < rowEnd; i++) {
-  //     //     if (data[i][col + count]) { pixelPresent = true }
-  //     //   }
-  //     //   count++;
-  //     // }
-  //     // hRight[row][col] = count;
-
-  //     // count = 0;
-  //     // pixelPresent = true;
-  //     // while (pixelPresent && row + count < srcData.rows && Math.abs(count) < length) {
-  //     //   pixelPresent = false;
-
-  //     //   for (let i = colStart; i < colEnd; i++) {
-  //     //     if (data[row + count][i]) { pixelPresent = true }
-  //     //   }
-  //     //   count++;
-  //     // }
-  //     // vDown[row][col] = count;
-  //   }
-  // }
-  // drawLine(x: number, y: number, length: number, data: any, dir: string) {
-
-
-  //   let p1 = new cv.Point(x, y);
-  //   let p2 = new cv.Point(x + length, y);
-  //   let p3 = new cv.Point(x, y + length);
-  //   let color = new cv.Scalar(255, 0, 255);
-  //   if (dir == 'horiz') {
-  //     p2 = new cv.Point(x + length, y);
-  //     color = new cv.Scalar(255, 0, 0);
-  //   }
-  //   if (dir == 'vert') {
-  //     p2 = new cv.Point(x, y + length);
-  //     color = new cv.Scalar(255, 0, 0);
-  //   }
-
-  //   cv.line(data, p1, p2, color);
-  //   if (dir == 'topLeft') {
-  //     cv.line(data, p1, p3, color);
-  //   }
-
-
-  // }
-  // makeTemp(temp: any, length: number, width: number, type: string) {
-
-  //   let p1 = new cv.Point(length + 1, length + 1);
-  //   let p2 = new cv.Point(length + 1, 2 * length + 1);
-  //   let p3 = new cv.Point(2 * length + 1, length + 1);
-  //   let color = new cv.Scalar(255, 255, 255);
-  //   let dsize = new cv.Size(2 * length + 1, 2 * length + 1);
-  //   cv.resize(temp, temp, dsize);
-  //   cv.line(temp, p1, p2, color, 4);
-  //   cv.line(temp, p1, p3, color, 4);
-
-
-  // }
 }

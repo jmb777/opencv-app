@@ -1,6 +1,7 @@
 <div>
   <button #videoBtn id = "videoBtn"  (click)="startVideo(true)">Scan puzzle</button>
   <button [hidden]="videoRunning" onclick="document.getElementById('fileInput').click()">Select a photo</button>
+  <button (click)="test()">Detect grid</button>
   <!-- <label class="btn" for="fileInput">Choose images to upload (PNG, JPG)</label> -->
   <input style="visibility:hidden;" (change)="readDataUrl($event)" #fileInput type="file" id="fileInput"
     name="fileInput" accept="image/*" />
@@ -9,8 +10,8 @@
 <div>
   {{ocrResult}}
 </div>
-<canvas #canvasInput id="canvasInput"></canvas>
-<canvas hidden #canvasOutput id="canvasOutput"></canvas>
+<canvas  #canvasInput id="canvasInput"></canvas>
+<canvas  #canvasOutput id="canvasOutput"></canvas>
 <div>
 
 
@@ -69,7 +70,7 @@
   <!-- <button (click)="grabFrame()">Grab frame</button>
   <button (click)="stopVideo()">Stop video</button> -->
   <div class="videoInput">
-    <video  #videoInput id="videoInput"    playsinline=true></video>
+    <video [hidden]="videoElementHidden"  #videoInput id="videoInput"    playsinline=true></video>
     <!-- <div >Some text</div> -->
     <div class="overlay">
       <canvas [hidden]="videoElementHidden" #canvasVideo id="canvasVideo"></canvas>
@@ -110,6 +111,8 @@
   </div>
 
 </div>
+<canvas  #canvasTest id="canvasTest"></canvas>
+{{logText}}
 <!-- This nav gives you links to click, which tells the router which route to use (defined in the routes constant in  AppRoutingModule) -->
 <!-- <nav>
   <ul>
