@@ -103,12 +103,21 @@ export class AppComponent {
   }
 
   readDataUrl(event: any) {
+    let canvas1 = document.getElementById('canvasTest') as HTMLCanvasElement;
+
+    let ctx1 = canvas1.getContext('2d');
+    ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+    canvas1 = document.getElementById('canvasTest1') as HTMLCanvasElement;
+
+    ctx1 = canvas1.getContext('2d');
+    ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
 
     if (event.target.files.length) {
       this.showGrid = false;
       const reader = new FileReader();
       const load$ = fromEvent(reader, 'load');
       let cv1 = cv;
+
       load$
         .pipe(
 
@@ -148,7 +157,7 @@ export class AppComponent {
       const ctx = canvas.getContext('2d');
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = async () => {
+      img.onload = () => {
         console.log(`Image resizing ${img.width}`);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -161,14 +170,17 @@ export class AppComponent {
         canvas.width = w;
         canvas.height = h;
         ctx.drawImage(img, 0, 0, w, h);
-        this.canvasInputHidden = false;
-        await this.showEl('grid');
+        // this.canvasInputHidden = false;
+
+        // await this.showEl('grid');
         observer.next();
+
 
         observer.complete();
       };
       img.src = imageUrl;
-      this.ocrResult = 'Finding grid';
+
+      // this.ocrResult = 'Finding grid';
     });
   }
 
@@ -182,20 +194,47 @@ export class AppComponent {
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     let lines = new cv.Mat();
     let color = new cv.Scalar(255, 0, 0, 255);
+    let color1 = new cv.Scalar(255, 255, 0, 255);
     let anchor = new cv.Point(-1, -1);
-    let M = cv.Mat.ones(2, 2, cv.CV_8U);
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-    // cv.threshold(dst, dst, 50 , 255, cv.THRESH_OTSU)
-    // cv.medianBlur(dst, dst, 5);
-    // const adapt_type = cv.ADAPTIVE_THRESH_GAUSSIAN_C
-    // const thresh_type = cv.THRESH_BINARY_INV
-    // cv.adaptiveThreshold(dst, dst, 255, adapt_type, thresh_type, 11, 2)
+    let M = cv.Mat.ones(4, 4, cv.CV_8U);
 
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     cv.Canny(src, src, 50, 200, 3);
     cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.bitwise_not(src, src);
+    // cv.adaptiveThreshold(src, src, 255, cv.ADAPTIVE_THRESH_MEAN_C,cv.THRESH_BINARY, 15, -2);
+    // let horizSize = src.cols / 60;
+    // let hoizontalStructure = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(horizSize, 1));
+    // cv.erode(src, src, hoizontalStructure);
+    // cv.dilate(src, src, hoizontalStructure);
+    // horizSize = src.cols / 30;
+    // hoizontalStructure = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(horizSize, 1));
+    // cv.erode(src, src, hoizontalStructure);
+    // cv.dilate(src, src, hoizontalStructure);
+    // cv.threshold(src, src, 50 , 255, cv.THRESH_OTSU)
+    // cv.medianBlur(src, src, 5);
+    // const adapt_type = cv.ADAPTIVE_THRESH_GAUSSIAN_C
+    // const thresh_type = cv.THRESH_BINARY_INV
+    // cv.adaptiveThreshold(src, src, 255, adapt_type, thresh_type, 11, 2)
+
+    // cv.Canny(src, src, 50, 200, 3);
+    // cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     // You can try more different parameters
-    // cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2,0,0);
+
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+
+
+    // let x = this.getMask(10, 1, 'tr');
+    dst = cv.imread('canvasInput');
+    cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2, 40, 10);
     // draw lines
+    console.log(`HoughlinesP rows ${lines.rows}`);
     for (let i = 0; i < lines.rows; ++i) {
       let rho = lines.data32F[i * 2];
       let theta = lines.data32F[i * 2 + 1];
@@ -206,18 +245,52 @@ export class AppComponent {
       // let startPoint = {x: x0 - 1000 * b, y: y0 + 1000 * a};
       // let endPoint = {x: x0 + 1000 * b, y: y0 - 1000 * a};
       // let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4?
+      let dx = lines.data32S[i * 4] - lines.data32S[i * 4 + 2];
+      let dy = lines.data32S[i * 4 + 1] - lines.data32S[i * 4 + 4];
+      let slope = Math.abs(dx / dy);
+      let vert = Math.atan((Math.PI / 180) * 10);
+      let horiz = Math.atan((Math.PI / 180) * 80);
       let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4 + 1]);
       let endPoint = new cv.Point(lines.data32S[i * 4 + 2], lines.data32S[i * 4 + 3]);
-      // cv.line(dst, startPoint, endPoint, color);
-      cv.circle(dst, startPoint, 1, color, -1);
+      if (slope < vert){
+        cv.line(dst, startPoint, endPoint, color);
+        cv.circle(dst, startPoint, 5, color, -1);
+      }
+      if (slope > horiz){
+        cv.line(dst, startPoint, endPoint, color1);
+        cv.circle(dst, startPoint, 5, color1, -1);
+      }
+      
+      
     }
-    // cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-    // let x = this.getMask(10, 1, 'tr');
-    
-    this.detectCorners(src, dst, 75, 20, 10);
+
+    cv.imshow('canvasTest1', src);
+    // this.detectCorners(src, dst, 40, 2, 10);
+    // this.showContours(src, dst);
     cv.imshow('canvasTest', dst);
+
     src.delete(); dst.delete(); lines.delete();
 
+  }
+  showContours(src: any, dst: any) {
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
+    let color = new cv.Scalar(255, 0, 0, 255);
+    // You can try more different parameters
+    cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+    // draw contours with random Scalar
+
+    for (let i = 0; i < contours.size(); ++i) {
+      // let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
+      //   Math.round(Math.random() * 255));
+      cv.drawContours(dst, contours, i, color, 1, cv.LINE_8, hierarchy, 100);
+      let cnt = contours.get(i);
+      // You can try more different parameters
+      let perimeter = cv.arcLength(cnt, false);
+      console.debug(`Contour ${i} perimeter ${perimeter}; vertices: ${cnt.step.length}`);
+    }
+
+    contours.delete(); hierarchy.delete();
   }
   findCorner(srcMat: any, shortLength: number, longLength: number, width: number, sensitivity: number, location: string) {
     const left = (location.substring(1, 2) == 'l') ? true : false;
@@ -267,7 +340,7 @@ export class AppComponent {
           }
         }
         if (counter > (2 * width + 1) * (shortLength + longLength + 1) * sensitivity) {
-          console.log(`${location} corner found at row ${i} column ${j}`);
+          // console.log(`${location} corner found at row ${i} column ${j}`);
         }
       }
     }
@@ -312,23 +385,26 @@ export class AppComponent {
     let contours = new cv.MatVector();
 
     let anchor = new cv.Point(-1, -1);
-    let M = cv.Mat.ones(4, 4, cv.CV_8U);
-    cv.Canny(dst, dst, 50, 100, 3, true);
+    let M = cv.Mat.ones(6, 6, cv.CV_8U);
+    // cv.Canny(dst, dst, 50, 100, 3, true);
 
 
-    cv.dilate(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    cv.dilate(dst, dst, M, anchor, 2, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
 
-    // const rho = 2;
-    // const theta = Math.PI/180;
-    // const thresh =  400;
-    // lines = cv.HoughLines(dst, rho, theta, thresh);
+
     cv.imshow(this.canvasTest.nativeElement.id, dst);
 
 
     cv.imshow(this.canvasOutput.nativeElement.id, src);
-    this.grid = this.detectCorners(dst, src, 75, 20, 10);
+    // this.grid = this.detectCorners(dst, dst, 75, 1, 10);
 
 
+    src.delete();
+    dst.delete();
+    dst1.delete();
+    lines.delete();
+    contours.delete();
+    M.delete();
 
 
     if (this.grid.length == 0) {
@@ -347,8 +423,10 @@ export class AppComponent {
     if (width % 2 == 0) { width++ }
     const offset = Math.floor(width / 2);
     let color = new cv.Scalar(255, 0, 0, 255);
-    let color1 = new cv.Scalar(255, 255, 0, 255);
 
+    let color1 = new cv.Scalar(255, 255, 0, 255);
+    let color2 = new cv.Scalar(255, 0, 255, 255);
+    let color3 = new cv.Scalar(0, 255, 0, 255);
 
 
     for (let i = 0; i < srcData.rows; i++) {
@@ -364,86 +442,204 @@ export class AppComponent {
 
 
 
-    for (let i = 10; i < srcData.rows - 10; i++) {
-      for (let j = 10; j < srcData.cols - 10; j++) {
-
-        let longRight = this.linePresent(this.data, i, j, length, sensitivity, 'right');
-        let longLeft = this.linePresent(this.data, i, j, length, sensitivity, 'left');
-        let longUp = this.linePresent(this.data, i, j, length, sensitivity, 'up');
-        let longDown = this.linePresent(this.data, i, j, length, sensitivity, 'down');
-        let shortLeft = (longLeft) ? longLeft : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'left');
-        let shortRight = (longRight) ? longRight : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'right');
-        let shortUp = (longUp) ? longUp : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'up');
-        let shortDown = (longDown) ? longDown : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'down');
+    for (let i = 2; i < srcData.rows - 2; i++) {
+      for (let j = 2; j < srcData.cols - 2; j++) {
+        // if(this.data[i][j]){
+        //   let p = new cv.Point(j, i);
+        //   cv.circle(outData,p,1,color,-1);
+        // }
 
 
-        if (longRight && longDown && !shortLeft && !shortUp) {
+        let longRight = this.linePresent(this.data, i, j, length, width, 'right');
+        let longLeft = this.linePresent(this.data, i, j, length, width, 'left');
+        let longUp = this.linePresent(this.data, i, j, length, width, 'up');
+        let longDown = this.linePresent(this.data, i, j, length, width, 'down');
+        let margin = 10;
+        if (longRight && longDown && !longLeft && !longUp) {
 
-          topLeftCoords.push(new Coord(i, j));
-          console.log('Top left found');
-          let p = new cv.Point(i,j);
-          cv.circle(outData,p, 2, color, -1);
-          // console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
-          // console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
+          if (this.includeCoord(i, j, margin)) {
+            topLeftCoords.push(new Coord(i, j));
+            let p = new cv.Point(j, i);
+            let p1 = new cv.Point(j + length, i);
+            cv.circle(outData, p, 1, color, -1);
+            // console.debug(`Top left corner at ${i},${j}`);
+          }
+
+
         }
-        if (longLeft && longDown && !shortRight && !shortUp) {
+        if (longLeft && longDown && !longRight && !longUp) {
 
-          topRightCoords.push(new Coord(i, j));
-          console.log('Top right found');
-          let p = new cv.Point(i,j);
-          cv.circle(outData,p, 2, color1, -1);
+          // let p = new cv.Point(j, i);
+          // let p1 = new cv.Point(j + length, i);
+          // cv.circle(outData, p, 1, color, -1);
+          // console.debug(`Top right corner at ${j},${i} ${longLeft} ${longDown} ${longUp} ${longRight}`);
+          if (this.includeCoord(i, j, margin)) {
+            topRightCoords.push(new Coord(i, j));
+            let p = new cv.Point(j, i);
+            let p1 = new cv.Point(j + length, i);
+            cv.circle(outData, p, 1, color1, -1);
+          }
+
+
         }
+        if (longUp && longRight && !longDown && !longLeft) {
 
-        if (longLeft && longUp && !shortRight && !shortDown) {
 
-          bottomRightCoords.push(new Coord(i, j));
-          console.log('Bottom right found');
+          if (this.includeCoord(i, j, margin)) {
+            bottomLeftCoords.push(new Coord(i, j));
+            let p = new cv.Point(j, i);
+            let p1 = new cv.Point(j + length, i);
+            cv.circle(outData, p, 1, color2, -1);
+          }
         }
-        if (longRight && longUp && !shortLeft && !shortDown) {
+        if (longUp && longLeft && !longDown && !longRight) {
+          if (this.includeCoord(i, j, margin)) {
+            bottomRightCoords.push(new Coord(i, j));
+            let p = new cv.Point(j, i);
+            let p1 = new cv.Point(j + length, i);
+            cv.circle(outData, p, 1, color3, -1);
+          }
 
-          bottomLeftCoords.push(new Coord(i, j));
-          console.log('Bottom left found');
+
+
+          // console.debug(`Bottom right corner at ${i},${j}`);
         }
+        // let coord = this.groupCoords(topLeftCoords, sensitivity)[0];
+        // let p = new cv.Point(coord.col, coord.row);
+        // cv.circle(outData, p, 1, color, -1);
+        // let shortLeft = (longLeft) ? longLeft : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'left');
+        // let shortRight = (longRight) ? longRight : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'right');
+        // let shortUp = (longUp) ? longUp : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'up');
+        // let shortDown = (longDown) ? longDown : this.linePresent(this.data, i, j, sensitivity, sensitivity, 'down');
+
+
+        // if (longRight && longDown && !shortLeft && !shortUp) {
+
+        //   topLeftCoords.push(new Coord(i, j));
+        //   console.log('Top left found');
+        //   let p = new cv.Point(i,j);
+        //   cv.circle(outData,p, 2, color, -1);
+        //   // console.log('Top left' + (longRight && longDown && !shortLeft && !shortUp));
+        //   // console.log('long left ' + this.linePresent(this.data, i, j, length, sensitivity, 'left'));
+        // }
+        // if (longLeft && longDown && !shortRight && !shortUp) {
+
+        //   topRightCoords.push(new Coord(i, j));
+        //   console.log('Top right found');
+        //   let p = new cv.Point(i,j);
+        //   cv.circle(outData,p, 2, color1, -1);
+        // }
+
+        // if (longLeft && longUp && !shortRight && !shortDown) {
+
+        //   bottomRightCoords.push(new Coord(i, j));
+        //   console.log('Bottom right found');
+        // }
+        // if (longRight && longUp && !shortLeft && !shortDown) {
+
+        //   bottomLeftCoords.push(new Coord(i, j));
+        //   console.log('Bottom left found');
+        // }
 
       }
     }
 
-    let points: Coord[] = this.findSquare(topLeftCoords, topRightCoords, bottomLeftCoords, bottomRightCoords, 10);
-    if (points.length == 4) {
+    let topL: Coord[] = this.groupCoords(topLeftCoords, 20);
+    // topL = this.groupCoords(topL, 20);
 
-      for (let i = 0; i < 10; i++) {
-        coords[i] = [];
-        for (let j = 0; j < 10; j++) {
-          coords[i][j] = new Coord(0, 0);
-        }
-      }
-      this.findROIs(points, coords);
-      let p0 = new cv.Point(points[0].col, points[0].row);
-      let p1 = new cv.Point(points[1].col, points[1].row);
-      let p2 = new cv.Point(points[2].col, points[2].row);
-      let p3 = new cv.Point(points[3].col, points[3].row);
+    topL.sort((a, b) => this.distanceFromCorner(a, b, 0, 0));
+    console.log(topL);
+    // const squareCoords: Coord[] = this.getSquareCoords(this.groupCoords(topLeftCoords, 6),
+    //   this.groupCoords(topRightCoords, 6),
+    //   this.groupCoords(bottomLeftCoords, 6),
+    //   this.groupCoords(bottomRightCoords, 6), 20);
+    // let point: Coord[] = this.groupCoords(topLeftCoords, 6);
+    // let p = new cv.Point(squareCoords[0].col, squareCoords[0].row);
 
-      let color = new cv.Scalar(255, 0, 255);
-      // cv.line(outData, p0, p1, color);
-      // cv.line(outData, p2, p3, color);
-      // cv.line(outData, p0, p2, color);
-      // cv.line(outData, p1, p3, color);
-      let color1 = new cv.Scalar(255, 0, 0);
-      for (let row = 0; row < coords.length - 1; row++) {
-        for (let col = 0; col < coords.length - 1; col++) {
-          let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row));
-          let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col), Math.floor(coords[row + 1][col + 1].row));
-          // cv.rectangle(srcData, pt, pb, color1);
-        }
-      }
+    // cv.circle(outData, p, 3, color, -1);
+    // point = this.groupCoords(topRightCoords, 6);
+    // p = new cv.Point(squareCoords[1].col, squareCoords[1].row);
+    // cv.circle(outData, p, 3, color, -1);
+    // point = this.groupCoords(bottomLeftCoords, 6);
+    // p = new cv.Point(squareCoords[2].col, squareCoords[2].row);
+    // cv.circle(outData, p, 3, color, -1);
+    // point = this.groupCoords(bottomRightCoords, 6);
+    // p = new cv.Point(squareCoords[3].col, squareCoords[3].row);
+    // cv.circle(outData, p, 3, color, -1);
 
 
-    }
+
+    // let points: Coord[] = this.findSquare(topLeftCoords, topRightCoords, bottomLeftCoords, bottomRightCoords, 10);
+    // if (points.length == 4) {
+
+    //   for (let i = 0; i < 10; i++) {
+    //     coords[i] = [];
+    //     for (let j = 0; j < 10; j++) {
+    //       coords[i][j] = new Coord(0, 0);
+    //     }
+    //   }
+    //   this.findROIs(points, coords);
+    //   let p0 = new cv.Point(points[0].col, points[0].row);
+    //   let p1 = new cv.Point(points[1].col, points[1].row);
+    //   let p2 = new cv.Point(points[2].col, points[2].row);
+    //   let p3 = new cv.Point(points[3].col, points[3].row);
+
+    //   let color = new cv.Scalar(255, 0, 255);
+    //   // cv.line(outData, p0, p1, color);
+    //   // cv.line(outData, p2, p3, color);
+    //   // cv.line(outData, p0, p2, color);
+    //   // cv.line(outData, p1, p3, color);
+    //   let color1 = new cv.Scalar(255, 0, 0);
+    //   for (let row = 0; row < coords.length - 1; row++) {
+    //     for (let col = 0; col < coords.length - 1; col++) {
+    //       let pt = new cv.Point(Math.floor(coords[row][col].col), Math.floor(coords[row][col].row));
+    //       let pb = new cv.Point(Math.floor(coords[row + 1][col + 1].col), Math.floor(coords[row + 1][col + 1].row));
+    //       // cv.rectangle(srcData, pt, pb, color1);
+    //     }
+    //   }
+
+
+    // }
 
 
 
     return coords;
 
+  }
+  distanceFromCorner(a: Coord, b: Coord, x0: number, y0: number): number {
+    const r0 = Math.sqrt((x0 - a.col) ^ 2 + (y0 - a.row) ^ 2);
+    const r1 = Math.sqrt((x0 - b.col) ^ 2 + (y0 - b.row) ^ 2);
+    return (r0 > r1) ? 1 : (r0 == r1) ? 0 : -1;
+  }
+  includeCoord(i: number, j: number, margin: number): boolean {
+    return (i > margin && j > margin) ? true : false;
+  }
+  getSquareCoords(topLeftCoords: Coord[], topRightCoords: Coord[], bottomLeftCoords: Coord[], bottomRightCoords: Coord[], sensitivity: number): Coord[] {
+    const depth = 3
+    const tLMax = (topLeftCoords.length < depth) ? depth : topLeftCoords.length;
+    const tRMax = (topRightCoords.length < depth) ? depth : topRightCoords.length;
+    const bLMax = (bottomLeftCoords.length < depth) ? depth : bottomLeftCoords.length;
+    const bRMax = (bottomRightCoords.length < depth) ? depth : bottomRightCoords.length;
+    let squareCoords: Coord[] = [];
+    for (let tR = 0; tR < tRMax; tR++) {
+      for (let tL = 0; tL < tLMax; tL++) {
+        for (let bR = 0; bR < bRMax; bR++) {
+          for (let bL = 0; bL < bLMax; bL++) {
+            if (Math.abs(topLeftCoords[tL].col - bottomLeftCoords[bL].col) < sensitivity &&
+              Math.abs(topLeftCoords[tL].row - topRightCoords[tR].row) < sensitivity &&
+              Math.abs(bottomRightCoords[bR].row - bottomLeftCoords[bL].row) < sensitivity &&
+              Math.abs(bottomRightCoords[bR].col - topRightCoords[tR].col) < sensitivity) {
+              squareCoords[0] = topLeftCoords[tL];
+              squareCoords[1] = topRightCoords[tR];
+              squareCoords[2] = bottomLeftCoords[bL];
+              squareCoords[3] = bottomRightCoords[bR];
+            }
+          }
+        }
+      }
+    }
+
+    return squareCoords;
   }
   findROIs(points: Coord[], coords: Coord[][]) {
     let width = (points[1].col - points[0].col) / 9;
@@ -477,47 +673,50 @@ export class AppComponent {
   }
 
   linePresent(data: boolean[][], row: number, col: number, length: number, width: number, dir: string): boolean {
-    let linePresent = true;
+    let linePresent = (data[row][col]) ? true : false;
     let count = 0;
     const offset = Math.floor(width / 2);
+    const skew = 0.2;
     switch (dir) {
       case 'up':
       case 'down':
 
-        while (linePresent && Math.abs(count) < length + 1) {
+        while (linePresent && Math.abs(count) < length + 1 && this.inRange(row, count, data.length)) {
           linePresent = false;
-          for (let c = this.checkRange(col - offset, data[row].length - 1); c < this.checkRange(col + offset + 1, data[row].length - 1); c++) {
-            if (data[this.checkRange(row + count, data.length - 1)][c]) {
-              linePresent = true;
+          const off = Math.floor(Math.abs(count * skew)) + 3;
+          for (let c = col - off; c < col + off + 1; c++) {
+            if (c > -1 && c < data[row].length) {
+              if (data[row + count][c]) {
+                linePresent = true;
+              }
+
             }
+
           }
           if (dir == 'down') { count++; } else { count--; };
         }
-        if (linePresent) {
-          let color1 = new cv.Scalar(255, 0, 0);
-          let p0 = new cv.Point(col, row + count);
-          let p1 = new cv.Point(col, row);
-          // console.log(`Vertical line at row ${row}, col ${col}: length ${count} `)
-        }
+
 
         break;
 
 
       case 'right':
       case 'left':
-        while (linePresent && Math.abs(count) < length + 1) {
+
+        while (linePresent && Math.abs(count) < length + 1 && this.inRange(col, count, data[row].length)) {
           linePresent = false;
-          for (let r = this.checkRange(row - offset, data.length - 1); r < this.checkRange(row + offset + 1, data.length - 1); r++) {
-            if (data[r][this.checkRange(col + count, data[row].length - 1)]) { linePresent = true; }
+          const off = Math.floor(Math.abs(count * skew)) + 3;
+          for (let r = row - off; r < row + off; r++) {
+            if (r > -1 && r < data.length) {
+              if (data[r][col + count]) { linePresent = true; }
+
+            }
+
           }
+
           if (dir == 'right') { count++; } else { count--; };
         }
-        if (linePresent) {
-          let color1 = new cv.Scalar(255, 0, 0);
-          let p0 = new cv.Point(col, row + count);
-          let p1 = new cv.Point(col, row);
-          // console.log(`Horizontal line at row ${row}, col ${col}: length ${count} `)
-        }
+
         break;
 
 
@@ -531,10 +730,10 @@ export class AppComponent {
     return linePresent;
 
   }
-  checkRange(n: number, max: number) {
-    if (n < 0) { n = 0; }
-    return (n > max) ? max : n;
+  inRange(row: number, count: number, size: number): boolean {
+    return (row + count > -1 && row + count < size);
   }
+
   findSquare(topLeftCoords: Coord[], topRightCoords: Coord[], bottomLeftCoords: Coord[], bottomRightCoords: Coord[], sensitivity: number): Coord[] {
     if (topLeftCoords.length == 0 || topRightCoords.length == 0 || bottomLeftCoords.length == 0 || bottomRightCoords.length == 0) {
       return [];
@@ -602,6 +801,7 @@ export class AppComponent {
   }
   groupCoords(coords: Coord[], sensitivity: number): Coord[] {
     let list: Coord[] = [];
+    let order: number[][] = [];
     coords.sort((a, b) => {
       return (a.row - b.row > 0) ? 1 : (a.row = b.row) ? 0 : -1;
     });
@@ -610,6 +810,7 @@ export class AppComponent {
     let count = 1;
     let lastRow = coords[0].row;
     let lastCol = coords[0].col;
+    let groupNumber = 0;
     for (let i = 1; i < coords.length; i++) {
       if (Math.abs(coords[i].row - lastRow) < sensitivity && Math.abs(coords[i].col - lastCol) < sensitivity) {
         rowSum = rowSum + coords[i].row;
@@ -617,7 +818,9 @@ export class AppComponent {
         count++;
       } else {
         list.push(new Coord(Math.floor(rowSum / count), Math.floor(colSum / count)));
+        order.push([count, groupNumber]);
         count = 1;
+        groupNumber++;
         rowSum = coords[i].row;
         lastRow = coords[i].row;
         colSum = coords[i].col;
@@ -625,7 +828,11 @@ export class AppComponent {
       }
     }
     list.push(new Coord(Math.floor(rowSum / count), Math.floor(colSum / count)));
-    return list;
+    order.push([count, groupNumber]);
+    order.sort((a, b) => b[0] - a[0]);
+    let rtnList: Coord[] = [];
+    for (let i = 0; i < order.length; i++) { rtnList.push(list[order[i][1]]) }
+    return rtnList;
   }
   checkMinus(n: number): number {
     return (n < 0) ? 0 : n;
