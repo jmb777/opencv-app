@@ -12,6 +12,7 @@ import * as Tesseract from 'tesseract.js';
 // import { CellComponent } from './cell/cell.component';
 import { CellOption } from './classes/cellOption';
 import { GridAlignColumnsDirective } from '@angular/flex-layout';
+import { PointJoin } from './classes/pointJoin';
 // import { Killer } from './classes/killer';
 
 @Component({
@@ -190,17 +191,22 @@ export class AppComponent {
   // }
 
   test() {
+
     let src = cv.imread('canvasInput');
     let dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
     let lines = new cv.Mat();
     let color = new cv.Scalar(255, 0, 0, 255);
     let color1 = new cv.Scalar(255, 255, 0, 255);
     let anchor = new cv.Point(-1, -1);
-    let M = cv.Mat.ones(4, 4, cv.CV_8U);
-
+    let M = cv.Mat.ones(3, 3, cv.CV_8U);
+    let startTime = Date.now();
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     cv.Canny(src, src, 50, 200, 3);
     cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
+    // cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     // cv.dilate(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
     // cv.erode(src, src, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
@@ -232,45 +238,281 @@ export class AppComponent {
 
     // let x = this.getMask(10, 1, 'tr');
     dst = cv.imread('canvasInput');
-    cv.HoughLinesP(src, lines, 1, Math.PI / 180, 2, 40, 10);
+    cv.HoughLinesP(src, lines, 2, Math.PI / 90,100, 50, 1);
     // draw lines
     console.log(`HoughlinesP rows ${lines.rows}`);
+    // let overlap: number[][] = [];
+    // for (let i = 0; i < dst.cols; i++) {
+    //   overlap[i] = [];
+    //   for (let j = 0; j < dst.rows; j++) {
+    //     overlap[i][j] = 0;
+    //   }
+    // }
+
+    let horizLines: Line[] = [];
+    let vertLines: Line[] = [];
     for (let i = 0; i < lines.rows; ++i) {
-      let rho = lines.data32F[i * 2];
-      let theta = lines.data32F[i * 2 + 1];
-      let a = Math.cos(theta);
-      let b = Math.sin(theta);
-      let x0 = a * rho;
-      let y0 = b * rho;
+      // let rho = lines.data32F[i * 2];
+      // let theta = lines.data32F[i * 2 + 1];
+      // let a = Math.cos(theta);
+      // let b = Math.sin(theta);
+      // let x0 = a * rho;
+      // let y0 = b * rho;
       // let startPoint = {x: x0 - 1000 * b, y: y0 + 1000 * a};
       // let endPoint = {x: x0 + 1000 * b, y: y0 - 1000 * a};
       // let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4?
+
       let dx = lines.data32S[i * 4] - lines.data32S[i * 4 + 2];
-      let dy = lines.data32S[i * 4 + 1] - lines.data32S[i * 4 + 4];
+      let dy = lines.data32S[i * 4 + 1] - lines.data32S[i * 4 + 3];
       let slope = Math.abs(dx / dy);
-      let vert = Math.atan((Math.PI / 180) * 10);
-      let horiz = Math.atan((Math.PI / 180) * 80);
+      let vert = Math.abs(Math.tan((Math.PI / 180) * 10));
+      let horiz = Math.abs(Math.tan((Math.PI / 180) * 80));
       let startPoint = new cv.Point(lines.data32S[i * 4], lines.data32S[i * 4 + 1]);
       let endPoint = new cv.Point(lines.data32S[i * 4 + 2], lines.data32S[i * 4 + 3]);
-      if (slope < vert){
-        cv.line(dst, startPoint, endPoint, color);
-        cv.circle(dst, startPoint, 5, color, -1);
-      }
-      if (slope > horiz){
-        cv.line(dst, startPoint, endPoint, color1);
-        cv.circle(dst, startPoint, 5, color1, -1);
-      }
-      
-      
-    }
+      let row1 = lines.data32S[i * 4 + 1];
+      let row2 = lines.data32S[i * 4 + 3];
+      let col1 = lines.data32S[i * 4];
+      let col2 = lines.data32S[i * 4 + 2];
 
+      // cv.line(dst, startPoint, endPoint, color);
+      if (slope < vert) {
+        let l: Line = new Line(new Coord(lines.data32S[i * 4 + 1], lines.data32S[i * 4]),
+          new Coord(lines.data32S[i * 4 + 3], lines.data32S[i * 4 + 2]));
+        cv.line(dst, startPoint, endPoint, color);
+        vertLines.push(l);
+
+        // cv.putText(dst,x,startPoint, cv.FONT_HERSHEY_TRIPLEX,1,  color,1, cv.LINE_AA);
+        // cv.circle(dst, startPoint, 5, color, -1);
+        cv.circle(dst, endPoint, 1, color1, -1);
+        cv.circle(dst, startPoint, 1, color1, -1);
+        // overlap[col1][row1]++;
+        // overlap[col2][row2]++;
+        // console.debug(`Vertical line ${i} slope ${slope} arctan ${vert}`);
+      }
+      if (slope > horiz) {
+        cv.line(dst, startPoint, endPoint, color1);
+        let l: Line = new Line(new Coord(lines.data32S[i * 4 + 1], lines.data32S[i * 4]),
+          new Coord(lines.data32S[i * 4 + 3], lines.data32S[i * 4 + 2]));
+        horizLines.push(l);
+        cv.circle(dst, startPoint, 1, color, -1);
+        cv.circle(dst, endPoint, 1, color, -1);
+        // overlap[col1][row1]++;
+        // overlap[col2][row2]++;
+      }
+
+
+
+      // for (let i = 0; i < dst.cols; i++) {
+
+      //   for (let j = 0; j < dst.rows; j++) {
+      //     if(overlap[i][j] > 1) {
+      //       startPoint = new cv.Point(i, j);
+      //       // cv.circle(dst, startPoint, 4, color1, -1);
+      //     }
+      //   }
+      // }
+
+
+    }
+    const sensitivity = 8;
+    // horizLines.sort((a, b) => {
+    //   return ((a.p1.col - b.p1.col) > 0) ? 1 : ((a.p1.col - b.p1.col) == 0) ? 0 : -1;
+    // });
+
+    // vertLines.sort((a, b) => {
+    //   return ((a.p1.row - b.p1.row) > 0) ? 1 : ((a.p1.row - b.p1.row) == 0) ? 0 : -1;
+    // });
+
+    vertLines.forEach(vL => {
+      this.findCornerAt(vertLines, horizLines, vL.p1, 8, dst);
+      this.findCornerAt(vertLines, horizLines, vL.p2, 8, dst);
+    });
+
+    // let intersects: Coord[] = [];
+    // horizLines.forEach(h => {
+
+    //   vertLines.forEach(v => {
+    //     let start1: Coord = new Coord(lines.data32S[h * 4 + 1], lines.data32S[h * 4]);
+    //     let end1: Coord = new Coord(lines.data32S[h * 4 + 3], lines.data32S[h * 4 + 2]);
+    //     let start2: Coord = new Coord(lines.data32S[v * 4 + 1], lines.data32S[v * 4]);
+    //     let end2: Coord = new Coord(lines.data32S[v * 4 + 3], lines.data32S[v * 4 + 2]);
+    //     if (Math.abs(start1.row - start2.row) < sensitivity && Math.abs(start1.col - start2.col) < sensitivity) {
+    //       intersects.push(new Coord((start1.row + start2.row) / 2, (start1.col + start2.col) / 2))
+    //     }
+    //     if (Math.abs(start1.row - end2.row) < sensitivity && Math.abs(start1.col - end2.col) < sensitivity) {
+    //       intersects.push(new Coord((start1.row + end2.row) / 2, (start1.col + end2.col) / 2))
+    //     }
+    //     if (Math.abs(end1.row - start2.row) < sensitivity && Math.abs(end1.col - start2.col) < sensitivity) {
+    //       intersects.push(new Coord((end1.row + start2.row) / 2, (end1.col + start2.col) / 2))
+    //     }
+    //     if (Math.abs(end1.row - end2.row) < sensitivity && Math.abs(end1.col - end2.col) < sensitivity) {
+    //       intersects.push(new Coord((end1.row + end2.row) / 2, (end1.col + end2.col) / 2))
+    //     }
+    //   })
+    // });
+
+    // intersects.forEach(inx => {
+    //   let p = new cv.Point(inx.col, inx.row);
+    //   cv.circle(dst, p, 4, color1, -1);
+    // });
+
+
+    // console.log(intersects);
+    // this.findSquareCoords(intersects, dst.rows, dst.cols, 40);
     cv.imshow('canvasTest1', src);
     // this.detectCorners(src, dst, 40, 2, 10);
     // this.showContours(src, dst);
     cv.imshow('canvasTest', dst);
 
     src.delete(); dst.delete(); lines.delete();
+    console.log(Date.now() - startTime)
 
+  }
+  findCornerAt(vertLines: Line[], horizLines: Line[], thisCoord: Coord, sensitivity: number, dst) {
+    let color1 = new cv.Scalar(255, 255, 0, 255);
+    let col = thisCoord.col;
+    let row = thisCoord.row;
+    let upLine = false;
+    let downLine = false;
+
+    let rightLine = false;
+    let leftLine = false;
+    let filteredHorizLines: Line[] = horizLines.filter(hLine => {
+      if ((Math.abs(hLine.p1.row - row) < sensitivity || Math.abs(hLine.p2.row - row) < sensitivity) ) { return true }
+      return false;
+    }
+    );
+    let filteredVertLines: Line[] = vertLines.filter(vLine => {
+      if ((Math.abs(vLine.p1.col - col) < sensitivity || Math.abs(vLine.p2.col - col) < sensitivity) ) { return true }
+      return false;
+    }
+    );
+    // console.log(`filtered horiz lines length ${filteredHorizLines.length}`);
+
+
+    horizLines.forEach(hL => {
+      let isCorner = true;
+      
+      filteredHorizLines.forEach(line => {
+        if ((line.p1.col < col - sensitivity && line.p2.col > col + sensitivity)
+          || (line.p2.col < col - sensitivity && line.p1.col > col +  sensitivity)) {
+          isCorner = false;
+        }
+      });
+      
+      filteredVertLines.forEach(line => {
+        if ((line.p1.row < row - sensitivity && line.p2.row > row + sensitivity)
+          || (line.p2.row < row - sensitivity && line.p1.row > row + sensitivity)) {
+          isCorner = false;
+        }
+      });
+      
+      if (Math.abs(hL.p1.row - row) < sensitivity && Math.abs(hL.p1.col - col) < sensitivity ) {
+
+        if (isCorner) {
+          let p = new cv.Point(col, row);
+          cv.circle(dst, p, 4, color1, -1);
+        }
+
+      }
+      if (Math.abs(hL.p2.row - row) < sensitivity && Math.abs(hL.p2.col - col) < sensitivity ) {
+        
+        if (isCorner) {
+          let p = new cv.Point(col, row);
+          cv.circle(dst, p, 4, color1, -1);
+        }
+
+      }
+
+
+
+    });
+
+
+
+    return [upLine, downLine, leftLine, rightLine];
+  }
+
+  findSquareCoords(intersects: Coord[], rows: number, cols: number, sensitivity: number) {
+    let topLeft: Coord[] = [];
+    let topRight: Coord[] = [];
+    let bottomLeft: Coord[] = [];
+    let bottomRight: Coord[] = [];
+    let tl = 0;
+    let tr = 0;
+    let bl = 0;
+    let br = 0;
+    let found = false;
+    let squareCoords: Coord[][] = [];
+
+
+
+    intersects.forEach(ix => {
+      if (ix.row < rows / 2) {
+        if (ix.col < cols / 2) {
+          topLeft.push(ix);
+        } else {
+          topRight.push(ix);
+        }
+      } else {
+        if (ix.col < cols / 2) {
+          bottomLeft.push(ix);
+        } else {
+          bottomRight.push(ix);
+        }
+      }
+    });
+
+
+    let topJoins: PointJoin[] = [];
+    let rightJoins: PointJoin[] = [];
+    let bottomJoins: PointJoin[] = [];
+    let leftJoins: PointJoin[] = [];
+
+    topJoins = this.findJoins(topLeft, topRight, topJoins, 'h', 10);
+    rightJoins = this.findJoins(topRight, bottomRight, rightJoins, 'v', 10);
+    bottomJoins = this.findJoins(bottomRight, bottomLeft, bottomJoins, 'h', 10);
+    leftJoins = this.findJoins(bottomLeft, topLeft, leftJoins, 'v', 10);
+
+    for (let p = 0; p < topJoins.length; p++) {
+      let topJoin = topJoins[p];
+      let tl = topLeft[p];
+      for (let q = 0; q < topJoin.joins.length; q++) {
+        let rightJoin = rightJoins[topJoin.joins[q]];
+        let tr = topRight[topJoin.joins[q]];
+        for (let r = 0; r < rightJoin.joins.length; r++) {
+          let bottomJoin = bottomJoins[rightJoin.joins[r]];
+          let br = bottomRight[rightJoin.joins[r]];
+          for (let s = 0; s < bottomJoin.joins.length; s++) {
+            let leftJoin = leftJoins[bottomJoin.joins[s]];
+            let bl = bottomLeft[bottomJoin.joins[s]];
+
+            if (leftJoin.joins.indexOf(topJoin.index)) {
+              console.debug(`Square found: top left: ${topLeft[p].row}, ${topLeft[p].col} ; ${topRight[q].row}, ${topRight[q].col}  ${bottomRight[r].row}, ${bottomRight[r].col} ; ${bottomLeft[s].row}, ${bottomLeft[s].col} `);
+            }
+
+
+          }
+        }
+      }
+    }
+    console.debug(squareCoords);
+  }
+  findJoins(coordsFrom: Coord[], coordsTo: Coord[], joins: PointJoin[], dir: string, sensitivity: number): PointJoin[] {
+    joins = [];
+    for (let i = 0; i < coordsFrom.length; i++) {
+      // let d0 = coordsFrom[i].row;
+      let d0 = (dir == 'h') ? coordsFrom[i].row : coordsFrom[i].col;
+      let thisJoin = new PointJoin(i);
+      for (let j = 0; j < coordsTo.length; j++) {
+        let d1 = (dir == 'h') ? coordsTo[j].row : coordsTo[j].col;
+        if (Math.abs(d0 - d1) < sensitivity) {
+          thisJoin.joins.push(j);
+        }
+      }
+      joins.push(thisJoin);
+    }
+    return joins;
   }
   showContours(src: any, dst: any) {
     let contours = new cv.MatVector();
